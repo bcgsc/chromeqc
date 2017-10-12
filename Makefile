@@ -4,7 +4,7 @@
 export SHELL=zsh -opipefail
 export REPORTTIME=1
 export TIMEFMT=time user=%U system=%S elapsed=%E cpu=%P memory=%M job=%J
-time=env time -v -o $@.time
+time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
@@ -64,7 +64,7 @@ data/SHA256: \
 data/%_lrbasic/outs/barcoded.fastq.gz: data/%.fq.gz
 	mkdir -p data/$*
 	ln -sf ../$(<F) data/$*/
-	cd data && longranger basic --id=$*_lrbasic --fastqs=$*
+	cd data && command time -v longranger basic --id=$*_lrbasic --fastqs=$*
 
 # Symlink the longranger basic FASTQ file.
 %.lrbasic.fq.gz: %_lrbasic/outs/barcoded.fastq.gz
