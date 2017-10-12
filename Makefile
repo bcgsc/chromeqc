@@ -1,15 +1,23 @@
 # Summarize sequencing library quality of 10x Genomics Chromium linked reads
 
-all: data/SHA256 lrbasic
-
-lrbasic: \
-	data/hg002g1.lrbasic.fq.gz \
-	data/hg003g1.lrbasic.fq.gz \
-	data/hg004g1.lrbasic.fq.gz
+# Report run time and memory usage.
+export SHELL=zsh -opipefail
+export REPORTTIME=1
+export TIMEFMT=time user=%U system=%S elapsed=%E cpu=%P memory=%M job=%J
+time=env time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
 .PHONY: all lrbasic
+
+# Run the entire analysis.
+all: data/SHA256 lrbasic
+
+# Extract the barcodes from the reads using Longranger basic.
+lrbasic: \
+	data/hg002g1.lrbasic.fq.gz \
+	data/hg003g1.lrbasic.fq.gz \
+	data/hg004g1.lrbasic.fq.gz
 
 # Download the human reference genome.
 data/grch38.fa.gz:
