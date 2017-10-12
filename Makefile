@@ -1,10 +1,15 @@
 # Summarize sequencing library quality of 10x Genomics Chromium linked reads
 
-all: data/SHA256
+all: data/SHA256 lrbasic
+
+lrbasic: \
+	data/hg002g1.lrbasic.fq.gz \
+	data/hg003g1.lrbasic.fq.gz \
+	data/hg004g1.lrbasic.fq.gz
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all
+.PHONY: all lrbasic
 
 # Download the human reference genome.
 data/grch38.fa.gz:
@@ -46,3 +51,13 @@ data/SHA256: \
 		data/hg004g1.fq.gz
 	gsha256sum -c SHA256
 	gsha256sum $^ >$@
+
+# Extract the barcodes from the reads using Longranger basic.
+data/%_lrbasic/outs/barcoded.fastq.gz: data/%.fq.gz
+	mkdir -p data/$*
+	ln -sf ../$(<F) data/$*/
+	cd data && longranger basic --id=$*_lrbasic --fastqs=$*
+
+# Symlink the longranger basic FASTQ file.
+%.lrbasic.fq.gz: %_lrbasic/outs/barcoded.fastq.gz
+	ln -sf $< $@
