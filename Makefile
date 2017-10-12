@@ -1,5 +1,8 @@
 # Summarize sequencing library quality of 10x Genomics Chromium linked reads
 
+# The reference genome.
+lrref=GRCh38-2.1.0
+
 # Report run time and memory usage.
 export SHELL=zsh -opipefail
 export REPORTTIME=1
@@ -8,21 +11,36 @@ time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all lrbasic
+.PHONY: all lrbasic lrwgsvc
 
 # Run the entire analysis.
-all: data/SHA256 lrbasic
+all: data/SHA256 lrbasic lrwgsvc
 
 # Extract the barcodes from the reads using Longranger basic.
 lrbasic: \
-	data/hg002g1.lrbasic.fq.gz \
-	data/hg003g1.lrbasic.fq.gz \
-	data/hg004g1.lrbasic.fq.gz
+	hg002g1.lrbasic.fq.gz \
+	hg003g1.lrbasic.fq.gz \
+	hg004g1.lrbasic.fq.gz
+
+# Align reads to the target genome, call variants, and create a Loupe file.
+lrwgsvc: \
+	hg002g1.lrwgsvc.bam \
+	hg003g1.lrwgsvc.bam \
+	hg004g1.lrwgsvc.bam
 
 # Download the human reference genome.
 data/grch38.fa.gz:
 	mkdir -p $(@D)
 	curl -o $@ ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+
+# Download the Long Ranger-compatible human reference genome.
+data/refdata-%.tar.gz:
+	curl -o $@ http://cf.10xgenomics.com/supp/genome/$@
+
+# Extract the Long Ranger-compatible human reference genome.
+data/refdata-%/genome: data/refdata-%.tar.gz
+	tar -x -C data -f $<
+	touch $@
 
 # Download the HG002 linked reads data.
 data/hg002/%.fastq.gz:
@@ -54,6 +72,7 @@ data/hg004g1.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz
 # Compute the SHA-256 of the data and verify it.
 data/SHA256: \
 		data/grch38.fa.gz \
+		data/refdata-GRCh38-2.1.0.tar.gz \
 		data/hg002g1.fq.gz \
 		data/hg003g1.fq.gz \
 		data/hg004g1.fq.gz
@@ -61,11 +80,21 @@ data/SHA256: \
 	gsha256sum $^ >$@
 
 # Extract the barcodes from the reads using Longranger basic.
-data/%_lrbasic/outs/barcoded.fastq.gz: data/%.fq.gz
+%_lrbasic/outs/barcoded.fastq.gz: data/%.fq.gz
 	mkdir -p data/$*
 	ln -sf $$(realpath $<) data/$*/
-	cd data && command time longranger basic --id=$*_lrbasic --fastqs=$*
+	command time longranger basic --id=$*_lrbasic --fastqs=data/$*
 
 # Symlink the longranger basic FASTQ file.
 %.lrbasic.fq.gz: %_lrbasic/outs/barcoded.fastq.gz
+	ln -sf $< $@
+
+# Align reads to the target genome, call variants, and create a Loupe file.
+%_lrwgsvc/outs/possorted_bam.bam: data/%.fq.gz data/refdata-$(lrref)/genome
+	mkdir -p data/$*
+	ln -sf $$(realpath $<) data/$*/
+	command time longranger wgs --vconly --id=$*_lrwgsvc --reference=data/refdata-$(lrref) --fastqs=data/$*
+
+# Symlink the longranger wgs bam file.
+%.lrwgsvc.bam: %_lrwgsvc/outs/possorted_bam.bam
 	ln -sf $< $@
