@@ -63,8 +63,8 @@ data/SHA256: \
 # Extract the barcodes from the reads using Longranger basic.
 data/%_lrbasic/outs/barcoded.fastq.gz: data/%.fq.gz
 	mkdir -p data/$*
-	ln -sf ../$(<F) data/$*/
-	cd data && command time -v longranger basic --id=$*_lrbasic --fastqs=$*
+	ln -sf $$(realpath $<) data/$*/
+	cd data && command time longranger basic --id=$*_lrbasic --fastqs=$*
 
 # Symlink the longranger basic FASTQ file.
 %.lrbasic.fq.gz: %_lrbasic/outs/barcoded.fastq.gz
