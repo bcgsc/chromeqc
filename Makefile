@@ -116,7 +116,7 @@ data/SHA256: \
 	command time longranger wgs --vconly --id=$*_lrwgsvc --reference=data/refdata-$(lrref) --fastqs=data/$*
 
 # Symlink the longranger wgs bam file.
-%.lrwgsvc.bam: %_lrwgsvc/outs/possorted_bam.bam
+%.lrwgsvc.bam: %_lrwgsvc/outs/phased_possorted_bam.bam
 	ln -sf $< $@
 
 # BWA
