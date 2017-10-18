@@ -12,6 +12,14 @@ t=8
 # gzip compression program. Use pigz for parallelized compression.
 gzip=pigz -p$t
 
+# Options for BCALM.
+
+# k-mer size.
+k=63
+
+# Minimum k-mer abundance threshold.
+abundance=2
+
 # Report run time and memory usage.
 export SHELL=zsh -opipefail
 export REPORTTIME=1
@@ -42,6 +50,20 @@ bwa: \
 	hg002g1.lrbasic.bwa.sort.bam.bai \
 	hg003g1.lrbasic.bwa.sort.bam.bai \
 	hg004g1.lrbasic.bwa.sort.bam.bai
+
+# Assemble reads with BCALM.
+bcalm: hg004g.lrbasic.bcalm.k$k.a$(abundance).fa
+
+hg004g.lrbasic.path: \
+		hg004g1.lrbasic.fq.gz \
+		hg004g2.lrbasic.fq.gz \
+		hg004g3.lrbasic.fq.gz \
+		hg004g4.lrbasic.fq.gz \
+		hg004g5.lrbasic.fq.gz \
+		hg004g6.lrbasic.fq.gz \
+		hg004g7.lrbasic.fq.gz \
+		hg004g8.lrbasic.fq.gz
+	echo $^ >$@
 
 # Download the human reference genome.
 data/GRCh38.fa.gz:
@@ -85,8 +107,22 @@ data/hg002g1.fq.gz: data/hg002/read-RA_si-GCACAATG_lane-001-chunk-0002.fastq.gz
 data/hg003g1.fq.gz: data/hg003/read-RA_si-GCTACTGA_lane-001-chunk-0002.fastq.gz
 	ln -s hg003/$(<F) $@
 
-# Symlink the HG004 data.
+# Symlink the HG004 lane 1 data.
 data/hg004g1.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g2.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-002-chunk-0004.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g3.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-003-chunk-0007.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g4.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-004-chunk-0006.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g5.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-005-chunk-0000.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g6.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-006-chunk-0003.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g7.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-007-chunk-0005.fastq.gz
+	ln -s hg004/$(<F) $@
+data/hg004g8.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-008-chunk-0001.fastq.gz
 	ln -s hg004/$(<F) $@
 
 # Compute the SHA-256 of the data and verify it.
@@ -142,3 +178,13 @@ data/SHA256: \
 # Index a BAM file.
 %.bam.bai: %.bam
 	samtools index $<
+
+# BCALM
+
+# Index the reads with BCALM.
+%.bcalm.k$k.a$(abundance).h5: %.path
+	$(time) bcalm -in $< -out $*.bcalm.k$k.a$(abundance) -k $k -abundance $(abundance) -nb-cores $t
+
+# Assemble unitigs with BCALM.
+%.fa: %.h5
+	$(time) bglue -in $< -out $@ -k $k -nb-cores $t
