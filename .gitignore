@@ -1,1 +1,8 @@
+*.bam
+*.bam.bai
+*.fq.gz
+*.log
+*.sam.gz
+*_lrbasic/
+*_lrwgsvc/
 data/
