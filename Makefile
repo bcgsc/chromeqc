@@ -146,7 +146,7 @@ data/SHA256: \
 	ln -sf $< $@
 
 # Align reads to the reference genome, call variants, and create a Loupe file.
-%_lrwgsvc/outs/possorted_bam.bam: data/%.fq.gz data/refdata-$(lrref)/genome
+%_lrwgsvc/outs/phased_possorted_bam.bam: data/%.fq.gz data/refdata-$(lrref)/genome
 	mkdir -p data/$*
 	ln -sf $$(realpath $<) data/$*/
 	command time longranger wgs --vconly --id=$*_lrwgsvc --reference=data/refdata-$(lrref) --fastqs=data/$*
