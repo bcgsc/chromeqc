@@ -77,7 +77,7 @@ data/%.fa: data/%.fa.gz
 
 # Download the Long Ranger-compatible human reference genome.
 data/refdata-%.tar.gz:
-	curl -o $@ http://cf.10xgenomics.com/supp/genome/$@
+	curl -o $@ http://cf.10xgenomics.com/supp/genome/$(@F)
 
 # Extract the Long Ranger-compatible human reference genome.
 data/refdata-%/genome: data/refdata-%.tar.gz
