@@ -56,22 +56,13 @@ class MolecIdentifier:
         samfile = pysam.AlignmentFile(filename, "rb")
         self._molec = {}
         
-        faiFH = open(faiFile, "r"); 
-        line = faiFH.readline()
-        while line:
-            tempArr = line.split()
-            self._contigSize[tempArr[0]] = int(tempArr[1])
-            self._gapsStart[tempArr[0]] = []
-            self._gapsEnd[tempArr[0]] = []
-            line = faiFH.readline()
-        faiFH.close()
-        
     def run(self):
         
         newMolecFH = open(outPrefix + ".tsv", "w"); 
         outfilebam = pysam.Samfile(outPrefix + ".bam", "wb", template=samfile)
         
-        prevBarcode = outfilebam;
+        prevBarcode = "";
+        prevChr = ""
         curReads = ();
         
         newMolecID = 0;        
@@ -86,7 +77,8 @@ class MolecIdentifier:
                 outfilebam.write(read)
                 continue
             
-            if prevBarcode != barcode:
+            chr = read.reference_id
+            if prevBarcode != barcode && read.reference_id:
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
@@ -98,7 +90,6 @@ class MolecIdentifier:
                 for read in curReads:
                     count += 1
                     
-                    chr = read.reference_id
                     value = read.pos
                     absDist = value - prevVal
                     totalBases += read.rlen
@@ -184,8 +175,6 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-b", "--bam", dest="bam",
                   help="Contig to genome BAM file", metavar="BAM")
-    parser.add_option("-f", "--fastaIndex", dest="fastaIndex",
-                  help="Fasta index for contigs")
     parser.add_option("-d", "--dist", dest="dist",
                   help="Minimum distance for contigs when considering interarrival times [50000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
@@ -197,8 +186,8 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
-    if options.bam and options.output and options.fastaIndex:
-        molecID = MolecIdentifier(options.bam, options.output, options.fastaIndex)
+    if options.bam and options.output:
+        molecID = MolecIdentifier(options.bam, options.output)
         if options.dist:
             molecID.setDist(options.dist)
         if options.min:
