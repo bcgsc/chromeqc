@@ -28,7 +28,7 @@ time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all lrbasic lrwgsvc bwa bcalm paper
+.PHONY: all lrbasic lrwgsvc bwa bcalm paper sortbx
 
 # Run the entire analysis.
 all: data/SHA256 lrbasic lrwgsvc bwa
@@ -50,6 +50,12 @@ bwa: \
 	hg002g1.lrbasic.bwa.sort.bam.bai \
 	hg003g1.lrbasic.bwa.sort.bam.bai \
 	hg004g1.lrbasic.bwa.sort.bam.bai
+
+# Sort compressed SAM files by barcode.
+sortbx: \
+	hg002g1.lrbasic.bwa.sortbx.sam.gz \
+	hg003g1.lrbasic.bwa.sortbx.sam.gz \
+	hg004g1.lrbasic.bwa.sortbx.sam.gz
 
 # Assemble reads with BCALM.
 bcalm: hg004g.lrbasic.bcalm.k$k.a$(abundance).fa
@@ -182,6 +188,10 @@ data/SHA256: \
 # Index a FASTA file.
 %.fa.fai: %.fa
 	samtools faidx $<
+
+# Sort a compressed SAM file by barcode.
+%.sortbx.sam.gz: %.sam.gz
+	samtools sort -@$t -Osam -tBX $< | $(gzip) >$@
 
 # Sort a compressed SAM file and convert to BAM.
 %.sort.bam: %.sam.gz
