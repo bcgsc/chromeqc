@@ -5,7 +5,6 @@
 *.loupe
 *.sam.gz
 *_lrbasic/
-*_lrwgsvc/*
 *_lrwgsvc/*/*
 .Rproj.user
 data/*
