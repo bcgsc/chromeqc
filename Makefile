@@ -204,10 +204,14 @@ data/SHA256: \
 paper.csl:
 	curl -o $@ https://www.zotero.org/styles/f1000research
 
+# Convert the list of DOIs to Bibtex
+%.bib: %.doi
+	curl -LH "Accept: text/bibliography; style=bibtex" `<$<` | sed 's/^ *//' >$@
+
 # Render Markdown to HTML using Pandoc
 %.html: %.md
-	pandoc -s --mathjax $(pandoc_opt) -o $@ $<
+	pandoc -s -Fpandoc-crossref -Fpandoc-citeproc -o $@ $<
 
 # Render Markdown to PDF using Pandoc
 %.pdf: %.md
-	pandoc $(pandoc_opt) -o $@ $<
+	pandoc -Fpandoc-crossref -Fpandoc-citeproc -o $@ $<
