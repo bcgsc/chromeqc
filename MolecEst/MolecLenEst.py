@@ -71,7 +71,7 @@ class MolecIdentifier:
         newMolecFH = open(outPrefix + ".tsv", "w"); 
         outfilebam = pysam.Samfile(outPrefix + ".bam", "wb", template=samfile)
         
-        prevBarcode = samfile[0];
+        prevBarcode = outfilebam;
         curReads = ();
         
         newMolecID = 0;        
@@ -96,9 +96,9 @@ class MolecIdentifier:
                 totalBases = 0
                 totalAS = 0
                 for read in curReads:
-                    read = curBarcodes[barcode][i]
                     count += 1
                     
+                    chr = read.reference_id
                     value = read.pos
                     absDist = value - prevVal
                     totalBases += read.rlen
@@ -109,7 +109,7 @@ class MolecIdentifier:
                         end = prevVal + read.query_alignment_length
                         
                         #adjust find distance from nearest read
-                        molec = Molecule(contig, start, end, \
+                        molec = Molecule(chr, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
                                          totalBases, totalAS)
@@ -160,7 +160,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + read.query_alignment_length
-                molec = Molecule(contig, start, end, newMolecID, barcode, trueMolecs, interArrivals, totalBases, totalAS)
+                molec = Molecule(chr, start, end, newMolecID, barcode, trueMolecs, interArrivals, totalBases, totalAS)
                 maxMolec = "NA";
                 max = 0;
                 for molecID in trueMolecs:
