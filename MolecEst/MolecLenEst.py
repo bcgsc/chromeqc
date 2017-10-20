@@ -207,4 +207,4 @@ if __name__ == '__main__':
             molecID.setMAPQ(options.mapq)
         molecID.run()
     else:
-        print 'Missing required options -o -i -f'
+        print 'Missing required options -b -o -f'
