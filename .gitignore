@@ -8,3 +8,4 @@
 *_lrwgsvc/
 .Rproj.user
 data/
+!data/README.md
