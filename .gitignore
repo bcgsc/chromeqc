@@ -9,4 +9,5 @@
 .Rproj.user
 data/*
 !*_lrwgsvc/outs/summary.csv
+!*_lrwgsvc/outs/summary.png
 !data/README.md
