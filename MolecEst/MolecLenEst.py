@@ -158,7 +158,7 @@ class MolecIdentifier:
                             prevVal1 = value
                     if interArrival > 0:
                         interArrivals.append(interArrival)
-                    prevVal = value                
+                    prevVal = value
                 end = prevVal + read.query_alignment_length
                 molec = Molecule(contig, start, end, newMolecID, barcode, trueMolecs, interArrivals, totalBases, totalAS)
                 maxMolec = "NA";
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
-    if options.input and options.output and options.fastaIndex:
+    if options.bam and options.output and options.fastaIndex:
         molecID = MolecIdentifier(options.bam, options.output, options.fastaIndex)
         if options.dist:
             molecID.setDist(options.dist)
