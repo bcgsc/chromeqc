@@ -63,7 +63,7 @@ hg004g.lrbasic.path: \
 		hg004g6.lrbasic.fq.gz \
 		hg004g7.lrbasic.fq.gz \
 		hg004g8.lrbasic.fq.gz
-	echo $^ >$@
+	ls $^ >$@
 
 # Download the human reference genome.
 data/GRCh38.fa.gz:
