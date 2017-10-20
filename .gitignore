@@ -5,7 +5,9 @@
 *.loupe
 *.sam.gz
 *_lrbasic/
-*_lrwgsvc/
+*_lrwgsvc/*
+*_lrwgsvc/*/*
 .Rproj.user
-data/
+data/*
+!*_lrwgsvc/outs/summary.csv
 !data/README.md
