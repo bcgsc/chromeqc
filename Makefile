@@ -107,7 +107,7 @@ data/hg002g1.fq.gz: data/hg002/read-RA_si-GCACAATG_lane-001-chunk-0002.fastq.gz
 data/hg003g1.fq.gz: data/hg003/read-RA_si-GCTACTGA_lane-001-chunk-0002.fastq.gz
 	ln -s hg003/$(<F) $@
 
-# Symlink the HG004 lane 1 data.
+# Symlink the HG004 data.
 data/hg004g1.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz
 	ln -s hg004/$(<F) $@
 data/hg004g2.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-002-chunk-0004.fastq.gz
