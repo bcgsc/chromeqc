@@ -28,7 +28,7 @@ time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all lrbasic lrwgsvc bwa
+.PHONY: all lrbasic lrwgsvc bwa bcalm paper
 
 # Run the entire analysis.
 all: data/SHA256 lrbasic lrwgsvc bwa
@@ -53,6 +53,9 @@ bwa: \
 
 # Assemble reads with BCALM.
 bcalm: hg004g.lrbasic.bcalm.k$k.a$(abundance).fa
+
+# Render the paper from Markdown to HTML and PDF with pandoc.
+paper: paper.html paper.pdf
 
 hg004g.lrbasic.path: \
 		hg004g1.lrbasic.fq.gz \
