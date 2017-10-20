@@ -8,12 +8,13 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+library(here)
+
 knitr::opts_chunk$set(echo = FALSE)
 ```
-hardcoding for now
 
 ```{r read data}
-g2 <- read.csv("summary2g.csv")
+g2 <- read.csv(here("hg002g1_lrwgsvc/outs/summary.csv"))
 ```
 
 #### Long Ranger software version `r g2$longranger_version`
