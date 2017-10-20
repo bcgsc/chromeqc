@@ -12,6 +12,8 @@ tblPrefix: ["Table", "Tables"]
 
 # Introduction
 
+MultiQC [@Ewels_2016]
+
 # Methods
 
 # Results
