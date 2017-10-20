@@ -1,0 +1,36 @@
+Hackseq 2017 Project 6
+========================================================
+author: Hackseq 2017 Project 6
+date: 2017-10-22
+autosize: true
+
+```{r setup}
+library(dplyr)
+library(ggplot2)
+```
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Slide With Code
+========================================================
+
+```{r}
+glimpse(cars)
+```
+
+Slide With Plot
+========================================================
+
+```{r, echo=FALSE}
+ggplot(cars) +
+    aes(x = speed, y = dist) +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
