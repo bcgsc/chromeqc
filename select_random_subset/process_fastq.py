@@ -1,3 +1,7 @@
+# parameters:
+# how many reads to burn-in
+# how many reads-pairs to process from fastq
+
 import gzip
 # from Bio import SeqIO
 
