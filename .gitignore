@@ -5,4 +5,5 @@
 *.sam.gz
 *_lrbasic/
 *_lrwgsvc/
+.Rproj.user
 data/
