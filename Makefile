@@ -197,3 +197,17 @@ data/SHA256: \
 # Assemble unitigs with BCALM.
 %.fa: %.h5
 	$(time) bglue -in $< -out $@ -k $k -nb-cores $t
+
+# Paper
+
+# Download the Genome Research citation style language (CSL)
+paper.csl:
+	curl -o $@ https://www.zotero.org/styles/f1000research
+
+# Render Markdown to HTML using Pandoc
+%.html: %.md
+	pandoc -s --mathjax $(pandoc_opt) -o $@ $<
+
+# Render Markdown to PDF using Pandoc
+%.pdf: %.md
+	pandoc $(pandoc_opt) -o $@ $<
