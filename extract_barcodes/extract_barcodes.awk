@@ -1,3 +1,4 @@
+#!/usr/bin/awk -f
 BEGIN{
     attach_in_readname = 1;
     attach_in_comment = 1;

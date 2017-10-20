@@ -1,6 +1,7 @@
 # Usage
 ```
-zcat interleaved_paired_end.fastq.gz | awk -f extract_barcodes.awk | less
+chmod +x extract_barcodes/extract_barcodes.awk
+zcat interleaved_paired_end.fastq.gz | extract_barcodes/extract_barcodes.awk | less
 ```
 
 The commandline flags are:
@@ -11,9 +12,9 @@ n: Oppress prepending the barcode the readname
 
 For example:
 ```
-zcat interleaved_paired_end.fastq.gz | awk -f extract_barcodes.awk -- -c | less
+zcat interleaved_paired_end.fastq.gz | extract_barcodes/extract_barcodes.awk -- -c | less
 ```
 or:
 ```
-zcat interleaved_paired_end.fastq.gz | awk -f extract_barcodes.awk -- -n | less
+zcat interleaved_paired_end.fastq.gz | extract_barcodes/extract_barcodes.awk -- -n | less
 ```
