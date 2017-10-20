@@ -1,0 +1,78 @@
+---
+title: "10X Genomics Summary Data"
+author: "Swapna Menon"
+date: "10/21/2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+hardcoding for now
+
+```{r read data}
+g2 <- read.csv("summary2g.csv")
+```
+
+#### Long Ranger software version `r g2$longranger_version`
+
+#### Chromium instrument ID `r g2$instrument_ids`
+
+###GEMs
+
+#### Number of Chromium GEMs generating non-trivial read-pairs  `r g2$gems_detected`
+
+#### Average amount of genomic DNA loaded per GEM  `r format(g2$mean_dna_per_gem, scientific=TRUE)`
+
+###INPUT DNA
+
+#### Total mass of DNA estimated to be input into the well of the Chromium chip `r format(g2$corrected_loaded_mass_ng, digits=2)` ng
+
+#### Length-weighted mean input DNA length `r format(g2$molecule_length_mean/1000, digits=2)` kb
+
+#### Length-weighted standard deviation of the input DNA length distribution `r format(g2$molecule_length_stddev, digits=2)` bp
+
+#### Fraction of reads carrying a valid 10X barcode sequence  `r format(g2$bc_on_whitelist, digits=2)`
+
+#### Mean base quality value on barcode bases  `r format(g2$bc_mean_qscore, digits=2)`
+
+#### N50 number of the read-pairs per input DNA molecule `r g2$n50_linked_reads_per_molecule`
+
+### PHASING
+
+#### Fraction of called SNPs that were phased `r format(g2$snps_phased, digits=2)`
+
+#### Fraction of genes shorter than 100kb with >1 heterozygous SNP that are phased into a single phase block `r format(g2$genes_phased_lt_100kb, digits=2)`
+
+#### Size of longest phase block `r format(g2$longest_phase_block/1000, digits=2)` kb
+
+#### N50 of called phased blocks `r format(g2$n50_phase_block/1000,digits=2)` kb
+
+
+### LINKED-READ ALIGNMENT STATISTICS
+
+#### Total number of reads supplied to Long Ranger `r g2$number_reads`
+
+#### Number of input reads that were mapped `r format(g2$mapped_reads, digits=2)`
+
+#### Median insert size of aligned read pairs `r format(g2$median_insert_size, digits=2)`
+
+#### Mean read depth across genome or other target region (includes PCR duplicates) `r format(g2$mean_depth, digits=2)`
+
+#### Fraction of non-N bases in the genome with zero coverage `r format(g2$zero_coverage,digits=2) `
+
+#### Fraction of reads marked as PCR duplicates `r format(g2$pcr_duplication, digits=2)`
+
+#### Fraction of aligned bases mapped with the target regions in targeted mode `r format(g2$on_target_bases, digits=2)`
+
+
+####TO DO
+
+1. Contract titles
+2. More visuals
+3. Plots especially last four metrics not included here
+4. Aesthetics
+
+
