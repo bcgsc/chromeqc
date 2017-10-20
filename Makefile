@@ -28,7 +28,7 @@ time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all lrbasic lrwgsvc bwa
+.PHONY: all lrbasic lrwgsvc bwa bcalm paper
 
 # Run the entire analysis.
 all: data/SHA256 lrbasic lrwgsvc bwa
@@ -53,6 +53,9 @@ bwa: \
 
 # Assemble reads with BCALM.
 bcalm: hg004g.lrbasic.bcalm.k$k.a$(abundance).fa
+
+# Render the paper from Markdown to HTML and PDF with pandoc.
+paper: paper.html paper.pdf
 
 hg004g.lrbasic.path: \
 		hg004g1.lrbasic.fq.gz \
@@ -197,3 +200,21 @@ data/SHA256: \
 # Assemble unitigs with BCALM.
 %.fa: %.h5
 	$(time) bglue -in $< -out $@ -k $k -nb-cores $t
+
+# Paper
+
+# Download the Genome Research citation style language (CSL)
+paper.csl:
+	curl -o $@ https://www.zotero.org/styles/f1000research
+
+# Convert the list of DOIs to Bibtex
+%.bib: %.doi
+	curl -LH "Accept: text/bibliography; style=bibtex" `<$<` | sed 's/^ *//' >$@
+
+# Render Markdown to HTML using Pandoc
+%.html: %.md
+	pandoc -s -Fpandoc-crossref -Fpandoc-citeproc -o $@ $<
+
+# Render Markdown to PDF using Pandoc
+%.pdf: %.md
+	pandoc -Fpandoc-crossref -Fpandoc-citeproc -o $@ $<
