@@ -1,8 +1,10 @@
 *.bam
 *.bam.bai
 *.fq.gz
+*.html
 *.log
 *.loupe
+*.pdf
 *.sam.gz
 *_lrbasic/
 *_lrwgsvc/*/*
