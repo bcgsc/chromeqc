@@ -125,6 +125,15 @@ data/hg004g7.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-007-chunk-0005.fastq.gz
 data/hg004g8.fq.gz: data/hg004/read-RA_si-GAGTTAGT_lane-008-chunk-0001.fastq.gz
 	ln -s hg004/$(<F) $@
 
+# Download the HG004 aligned linked reads data.
+data/hg004/%.bam:
+	mkdir -p $(@D)
+	curl -o $@ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/10XGenomics_ChromiumGenome_LongRanger2.1_09302016/NA24143_GRCh38/$(@F)
+
+# Symlink the HG004 aligned linked reads data.
+data/hg004.lrwgs.bam: data/hg004/NA24143_GRCh38_phased_possorted_bam.bam
+	ln -s hg004/$(<F) $@
+
 # Compute the SHA-256 of the data and verify it.
 data/SHA256: \
 		data/GRCh38.fa.gz \
