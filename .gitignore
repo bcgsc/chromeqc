@@ -2,6 +2,7 @@
 *.bam.bai
 *.fq.gz
 *.log
+*.loupe
 *.sam.gz
 *_lrbasic/
 *_lrwgsvc/
