@@ -16,14 +16,9 @@ The tool will have two modes of operation: fast and complete. The fast mode will
 -p --stats_out_path: default='.'                 , type=str  , note: the directory needs to be created already
 -v --verbose       : default=False               , no value  , note: If supplied, will be set to true, else will be false.
 ```
-
-# Example
-```
-python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
-```
 ### Examples
 ```
-python3 chromeQC
+python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
 ```
 ## How ChromeQC Works
 
