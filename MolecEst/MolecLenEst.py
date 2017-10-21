@@ -59,6 +59,7 @@ class MolecIdentifier:
     def run(self,outPrefix):
         
         newMolecFH = open(outPrefix + ".tsv", "w");
+        newMolecFH.write("BX\tMI\tRname\tStart\tEnd\tReads\n")
         samfile = pysam.AlignmentFile(self._filename, "rb")
         outfilebam = pysam.AlignmentFile(outPrefix + ".bam", "wb", template=samfile)
         
