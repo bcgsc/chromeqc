@@ -15,8 +15,7 @@ tblPrefix: ["Table", "Tables"]
 
 Quality control (QC) for sequencing data is done to assess whether the sequencing experiment has been perfomed successfully or not. One popular QC tool for Illumina reads is FastQC which gathers basic information such as base qualities, sequence distribution, or GC content and reports that in quick manner. However, FastQC does not provide QC of aspects that are specific to the long range reads of Chromium. 
 
-For that, 10x Genomics provide their own analysis tool, Loupe. Loupe provides QC summary of the sequencing data alongside phasing information, SNP calling, and structural variants discovered. When analyzing [some number]x coverage fastq file, Loupe takes about [some time number] at memory usage peak of [some memory number]. The aim of ChromeQC analysis of Chromium sequencing data that is focused on QC of sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode at substantially less time and memory costs than Loupe's performance.
-MultiQC [@Ewels_2016]
+For that, 10x Genomics provide their own analysis tool, Loupe. Loupe provides QC summary of the sequencing data alongside phasing information, SNP calling, and structural variants discovered. When analyzing [some number]x coverage fastq file, Loupe takes about [some time number] at memory usage peak of [some memory number]. The aim of ChromeQC analysis of Chromium sequencing data that is focused on QC of sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode at substantially less time and memory costs than Loupe's performance. On top of that, ChromeQC is compatable with MultiQC [@Ewels_2016], a tool that combines relevent QC reports from multiple samples into a single integrated report.
 
 # Methods
 ## Extract Barcodes
