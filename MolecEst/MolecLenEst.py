@@ -121,7 +121,7 @@ class MolecIdentifier:
                 aScores = []
                 
                 for curRead in curReads:
-                    print(curRead.reference_name + " " + str(curRead.pos))
+#                     print(curRead.reference_name + " " + str(curRead.pos))
                     
                     count += 1
                     
