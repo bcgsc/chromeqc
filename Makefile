@@ -82,7 +82,7 @@ data/GRCh38.fa.gz:
 # Uncompress data.
 data/%.fa: data/%.fa.gz
 	mkdir -p $(@D)
-	gunzip -c $< >$@
+	gunzip -c $< | seqtk seq >$@
 
 # Download the Long Ranger-compatible human reference genome.
 data/refdata-%.tar.gz:
