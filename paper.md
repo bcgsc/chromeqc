@@ -11,11 +11,11 @@ tblPrefix: ["Table", "Tables"]
 # Abstract
 
 # Introduction
-Quality control (QC) for sequencing data is done in order to assess whether the sequencing experiment has been perfomed successfully or not. One popular QC tool for Illumina reads is FastQC which gathers basic information such as base qualities, sequence distribution, or GC content and reports that in quick manner.
-
 10x Genomics Chromium sequencing is long range information sequencing library preparation toolkit. Every few DNA molecules (~100K bp) will have a unique 16 nucleotides long barcode mixed with them. These molecules are then sequenced with Illumina short paired-end sequencing. A molecule is expected to have a uniform distribution of locations of the reads covering it. 
 
-10x Genomics provide their own analysis tool, Loupe. Loupe provides QC summary of the sequencing data alongside phasing information, SNP calling, and structural variants discovered. When analyzing [some number]x coverage fastq file, Loupe takes about [some time number] at memory usage peak of [some memory number]. The aim of ChromeQC analysis of Chromium sequencing data that is focused on QC of sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode at substantially less time and memory costs than Loupe's performance.
+Quality control (QC) for sequencing data is done to assess whether the sequencing experiment has been perfomed successfully or not. One popular QC tool for Illumina reads is FastQC which gathers basic information such as base qualities, sequence distribution, or GC content and reports that in quick manner. However, FastQC does not provide QC of aspects that are specific to the long range reads of Chromium. 
+
+For that, 10x Genomics provide their own analysis tool, Loupe. Loupe provides QC summary of the sequencing data alongside phasing information, SNP calling, and structural variants discovered. When analyzing [some number]x coverage fastq file, Loupe takes about [some time number] at memory usage peak of [some memory number]. The aim of ChromeQC analysis of Chromium sequencing data that is focused on QC of sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode at substantially less time and memory costs than Loupe's performance.
 MultiQC [@Ewels_2016]
 
 # Methods
