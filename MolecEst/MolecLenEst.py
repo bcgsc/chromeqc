@@ -17,7 +17,7 @@ from optparse import OptionParser
 import pysam
 
 class Molecule:
-    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
+    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
         self.rname = rname
         self.start = start
         self.end = end
@@ -26,11 +26,12 @@ class Molecule:
         self.interArrivals = interArrivals
         self.totalBases = totalBases
         self.alignScore = alignScore
+        self.count = count
     
     def asTSV(self):
         return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(len(self.interArrivals) + 2))
+                 + "\t" + str(self.count))
         
     def getLength(self):
         return self.end-self.start
@@ -92,19 +93,21 @@ class MolecIdentifier:
         newMolecID = 0
         for read in samfile:
             barcode = ""
+            if read.is_unmapped:
+                continue
             # extract barcode
             barcodeList = [bc for bc in read.tags if "BX" in bc]
             if len(barcodeList) != 0:
                 barcode = barcodeList[0][1]
+                curReads.append(read)
             else:
                 if self._newBamFilename:
                     self._outfilebam.write(read)
                     continue
-            if read.is_unmapped:
-                continue
-            else:
-                curReads.append(read)
-            if prevBarcode != barcode and read.reference_id != prevChr:
+            if prevChr == "" or prevBarcode == "":
+                prevBarcode = barcode
+                prevChr = read.reference_id
+            if prevBarcode != barcode or read.reference_id != prevChr:
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
@@ -138,7 +141,7 @@ class MolecIdentifier:
                         molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
-                                         totalBases, totalAS)
+                                         totalBases, totalAS, count)
                         if curRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -185,7 +188,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + curRead.query_alignment_length
-                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
+                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
                 if len(interArrivals) >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
