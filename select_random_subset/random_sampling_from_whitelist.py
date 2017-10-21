@@ -52,7 +52,7 @@ if __name__ == "__main__":
     else:
         for input_path in args.in_fastq:
             if input_path[-2:] == 'gz':
-                my_input = gzip.open(input_path, 'rb')
+                input_file = gzip.open(input_path, 'rb')
             else:
                 input_file = open(input_path, 'rb')
             my_process_fastq.process_fastq(file_in=input_file, file_out=my_output)
