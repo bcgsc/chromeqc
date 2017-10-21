@@ -17,7 +17,7 @@ from optparse import OptionParser
 import pysam
 
 class Molecule:
-    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
+    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
         self.rname = rname
         self.start = start
         self.end = end
@@ -92,19 +92,21 @@ class MolecIdentifier:
         newMolecID = 0
         for read in samfile:
             barcode = ""
+            if read.is_unmapped:
+                continue
             # extract barcode
             barcodeList = [bc for bc in read.tags if "BX" in bc]
             if len(barcodeList) != 0:
                 barcode = barcodeList[0][1]
+                curReads.append(read)
             else:
                 if self._newBamFilename:
                     self._outfilebam.write(read)
                     continue
-            if read.is_unmapped:
-                continue
-            else:
-                curReads.append(read)
-            if prevBarcode != barcode and read.reference_id != prevChr:
+            if prevChr == "" or prevBarcode == "":
+                prevBarcode = barcode
+                prevChr = read.reference_id
+            if prevBarcode != barcode or read.reference_id != prevChr:
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
