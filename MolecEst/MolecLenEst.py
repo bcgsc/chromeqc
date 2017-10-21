@@ -96,19 +96,20 @@ class MolecIdentifier:
             barcodeList = [bc for bc in read.tags if "BX" in bc]
             if len(barcodeList) != 0:
                 barcode = barcodeList[0][1]
-                curReads.append(read)
             else:
                 if self._newBamFilename:
                     self._outfilebam.write(read)
                     continue
             if read.is_unmapped:
                 continue
+            else:
+                curReads.append(read)
             if prevBarcode != barcode and read.reference_id != prevChr:
-                rname = read.reference_name
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
                 start = curReads[0].pos
+                rname = curReads[0].reference_name
                 interArrivals = []
                 count = 0
                 totalBases = 0
@@ -119,36 +120,38 @@ class MolecIdentifier:
                 #alignment score values for calculating median
                 aScores = []
                 
-                for read in curReads:
+                for curRead in curReads:
+#                     print(curRead.reference_name + " " + str(curRead.pos))
+                    
                     count += 1
                     
-                    value = read.pos
+                    value = curRead.pos
                     absDist = value - prevVal
-                    totalBases += read.rlen
-                    totalAS += read.get_tag("AS")
+                    totalBases += curRead.rlen
+                    totalAS += curRead.get_tag("AS")
                     
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
-                        end = prevVal + read.query_alignment_length
+                        end = prevVal + curRead.query_alignment_length
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
                                          totalBases, totalAS)
-                        
-                        self.printTSV(molec)
-                        if read.is_reverse:
+                        if curRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
                         else:
                             prevVal1 = value
                             prevVal2 = 0
                         start = value;
-                        newMolecID += 1
+                        if len(interArrivals) >= self._min:
+                            self.printTSV(molec)
+                            newMolecID += 1
                         if self._newBamFilename:
-                            read.tags += [("MI", newMolecID)]
-                            self._outfilebam.write(read)
+                            curRead.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(curRead)
                         interArrivals = []
                         prevVal = value
                         totalBases = 0;
@@ -157,12 +160,12 @@ class MolecIdentifier:
                         continue
                     else:
                         if self._newBamFilename:
-                            read.tags += [("MI", newMolecID)]
-                            self._outfilebam.write(read)
+                            curRead.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(curRead)
                     
                     #inter arrival time is distance between read of the same direction
                     interArrival = 0
-                    if read.is_reverse:
+                    if curRead.is_reverse:
                         if prevVal2 == 0:
                             prevVal2 = value
                             prevVal = value
@@ -181,10 +184,11 @@ class MolecIdentifier:
                     if interArrival > 0:
                         interArrivals.append(interArrival)
                     prevVal = value
-                end = prevVal + read.query_alignment_length
+                end = prevVal + curRead.query_alignment_length
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
-                self.printTSV(molec)
-                newMolecID += 1
+                if len(interArrivals) >= self._min:
+                    self.printTSV(molec)
+                    newMolecID += 1
                 curReads = []
             prevBarcode = barcode;
             prevChr = read.reference_id
