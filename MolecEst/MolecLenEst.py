@@ -27,12 +27,11 @@ class Molecule:
         self.totalBases = totalBases
         self.alignScore = alignScore
         self.count = count
-    
+
     def asTSV(self):
-        return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
-                 + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(len(self.interArrivals)))
-        
+        return self.rname + "\t" + str(self.start) + "\t" + str(self.end) \
+            + "\t" + self.barcode + "\t" + str(self.count) + "\t" + str(self.newMolecID)
+
     def getLength(self):
         return self.end-self.start
         
@@ -80,7 +79,7 @@ class MolecIdentifier:
         else:
             self._outfilebam = None
         
-        header = "BX\tMI\tRname\tStart\tEnd\tReads"
+        header = "Rname\tStart\tEnd\tBX\tReads\tMI"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
             self._newMolecFH.write(header + "\n")
