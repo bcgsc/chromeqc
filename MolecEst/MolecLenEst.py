@@ -63,7 +63,7 @@ class MolecIdentifier:
         
         prevBarcode = "";
         prevChr = ""
-        curReads = ();
+        curReads = []
         
         newMolecID = 0;        
         for read in samfile:
