@@ -17,8 +17,8 @@ from optparse import OptionParser
 import pysam
 
 class Molecule:
-    def __init__(self, contig, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
-        self.contig = contig
+    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
+        self.rname = rname
         self.start = start
         self.end = end
         self.barcode = barcode
@@ -29,7 +29,7 @@ class Molecule:
     
     def printAsTsv(self, fh, count):
         fh.write(self.barcode + "\t" + str(self.newMolecID) + "\t" \
-                 + str(self.contig) + "\t" + str(self.start) + "\t" + str(self.end) \
+                 + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
                  + "\t" + str(len(self.interArrivals) + 2) + "\n")
         
     def getLength(self):
@@ -49,7 +49,6 @@ class MolecIdentifier:
     def __init__(self, filename):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
-        @todo: Possible to thread per contig
         """
         self._min = 4
         self._maxDist = 50000
@@ -80,7 +79,7 @@ class MolecIdentifier:
                 outfilebam.write(read)
                 continue
             
-            chr = read.reference_id
+            chr = samfile.getrname(read.reference_id)
             if prevBarcode != barcode and read.reference_id != prevChr:
                 prevVal = 0
                 prevVal1 = 0
@@ -172,9 +171,9 @@ if __name__ == '__main__':
     # specify parser options
     parser = OptionParser()
     parser.add_option("-b", "--bam", dest="bam",
-                  help="Contig to genome BAM file", metavar="BAM")
+                  help="Reference to genome BAM file", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
-                  help="Minimum distance for contigs when considering interarrival times [50000]", metavar="DIST")
+                  help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
                   help="Output location of result, will add a suffix to indicate what type of file it is", metavar="OUTPUT")
     parser.add_option("-m", "--min", dest="min",
