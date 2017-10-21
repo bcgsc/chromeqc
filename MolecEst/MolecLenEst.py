@@ -60,7 +60,7 @@ class MolecIdentifier:
     def run(self,outPrefix):
         
         newMolecFH = open(outPrefix + ".tsv", "w"); 
-        outfilebam = pysam.Samfile(outPrefix + ".bam", "wb", template=samfile)
+        outfilebam = pysam.AlignmentFile(outPrefix + ".bam", "wb", template=samfile)
         
         prevBarcode = ""
         prevChr = ""
