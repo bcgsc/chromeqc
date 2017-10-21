@@ -29,3 +29,5 @@ time minimap2 -t1 -sr ../data/GRCh38.mmi hg002g1_small.fq > /dev/null 2>> timing
 [M::main] CMD: minimap2 -t1 -sr ../data/GRCh38.mmi hg002g1_small.fq
 [M::main] Real time: 67.044 sec; CPU: 55.962 sec
        67.06 real        36.24 user        19.72 sys
+time magicblast -query hg002g1_small.fq -db ../data/GRCh38.fa -infmt fastq > /dev/null 2>>timing.txt
+      658.44 real       641.61 user        11.66 sys
