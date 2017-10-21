@@ -31,7 +31,7 @@ class Molecule:
     def asTSV(self):
         return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(self.count))
+                 + "\t" + str(len(self.interArrivals)))
         
     def getLength(self):
         return self.end-self.start
@@ -58,7 +58,7 @@ class MolecIdentifier:
         
     def printTSV(self, molec):
         if self._tsvFilename:
-            self._newMolecFH(molec.asTSV() + "\n")
+            self._newMolecFH.write(molec.asTSV() + "\n")
         else:
             print(molec.asTSV())
     
@@ -99,16 +99,16 @@ class MolecIdentifier:
             barcodeList = [bc for bc in read.tags if "BX" in bc]
             if len(barcodeList) != 0:
                 barcode = barcodeList[0][1]
-                curReads.append(read)
             else:
                 if self._newBamFilename:
                     self._outfilebam.write(read)
-                    continue
+                continue
             if prevChr == "" or prevBarcode == "":
                 prevBarcode = barcode
                 prevChr = read.reference_id
             if prevBarcode != barcode or read.reference_id != prevChr:
                 prevVal = 0
+                prevRead = curReads[0]
                 prevVal1 = 0
                 prevVal2 = 0
                 start = curReads[0].pos
@@ -124,10 +124,8 @@ class MolecIdentifier:
                 aScores = []
                 
                 for curRead in curReads:
-#                     print(curRead.reference_name + " " + str(curRead.pos))
-                    
                     count += 1
-                    
+#                     print(str(curRead.is_reverse) + " " + curRead.reference_name + " " + str(curRead.pos))                    
                     value = curRead.pos
                     absDist = value - prevVal
                     totalBases += curRead.rlen
@@ -135,14 +133,14 @@ class MolecIdentifier:
                     
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
-                        end = prevVal + curRead.query_alignment_length
+                        end = prevVal + prevRead.query_alignment_length
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
                                          totalBases, totalAS, count)
-                        if curRead.is_reverse:
+                        if prevRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
                         else:
@@ -187,12 +185,14 @@ class MolecIdentifier:
                     if interArrival > 0:
                         interArrivals.append(interArrival)
                     prevVal = value
+                    prevRead = curRead
                 end = prevVal + curRead.query_alignment_length
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
                 if len(interArrivals) >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
                 curReads = []
+            curReads.append(read)
             prevBarcode = barcode;
             prevChr = read.reference_id
         
