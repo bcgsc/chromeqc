@@ -37,7 +37,8 @@ def get_barcodes_from_fastq(fastq_path):
                 dash_index = dash_indices[-1]
                 # Get the barcode from the line
                 barcode = line[colon_index+1:dash_index]
-                barcodes.append(barcode)
+                if len(barcode) == 16:
+                    barcodes.append(barcode)
     return barcodes
 
 def matched_off_by_one(barcode,whitelisted_barcodes):
@@ -77,15 +78,16 @@ def examine_barcodes(barcodes,whitelisted_barcodes):
         else:
             barcode_stats[NO_MATCH] += 1
     num_barcodes = len(barcodes)
-    for stat in barcodes:
-        barcodes_stats[stat] = barcodes[stat]/num_barcodes 
-    return barcodes_stats
+    print("Number of barcodes: %d" % (num_barcodes))
+    for stat in barcode_stats:
+        barcode_stats[stat] = barcode_stats[stat]/num_barcodes 
+    return barcode_stats
 
 def write_barcode_stats(barcode_stats, output_path):
     '''
     Print the results of the barcode whitelist cross reference and write the output to a file
     '''
-    match_line = "Matched: %f" % (barcode_stats[MATCHED])
+    match_line = "Matches: %f" % (barcode_stats[MATCH])
     off_by_one_line = "Off by one: %f" % (barcode_stats[OFF_BY_ONE])
     no_match_line = "No match: %f" % (barcode_stats[NO_MATCH])
     lines = [match_line,off_by_one_line,no_match_line]
@@ -96,6 +98,13 @@ def write_barcode_stats(barcode_stats, output_path):
             output_file.write(line)
             output_file.write('\n') 
 
+def test():
+    no_match_bc = "A" * 16
+    off_by_one_bc = "CGACACGGTATGGGCC" # The A between the two T's is the error; there should be three T's
+    matching_barcode = "CGACACGGTTTGGGCC"
+    barcodes = [no_match_bc,off_by_one_bc,matching_barcode]
+    return barcodes
+
 def main(argv):
     help_message = "Description: Cross references barcodes with known whitelisted barcodes to determine\n" \
                  + "             which match exactly, which are off by one base, and which have no match\n" \
@@ -103,7 +112,7 @@ def main(argv):
     usage_message = "Usage: %s [-h help and usage] [-f input FASTQ file] [-b whitelisted barcodes]\n"% (sys.argv[0]) \
                   + "                                      [-o output path for stats]"
 
-    options = "hf:b:o:"
+    options = "htf:b:o:"
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],options)
@@ -119,6 +128,7 @@ def main(argv):
     fastq_path = None
     barcode_path = None
     output_path = None
+    do_test = False
 
     for opt, arg in opts:
         if opt == '-h':
@@ -131,10 +141,12 @@ def main(argv):
             barcode_path = arg
         elif opt == '-o':
             output_path = arg
+        elif opt == '-t':
+            do_test = True
 
     opts_incomplete = False
 
-    if fastq_path is None:
+    if fastq_path is None and not do_test:
         print("Error: please provide a FASTQ file.")
         opts_incomplete = True
     if barcode_path is None:
@@ -149,7 +161,10 @@ def main(argv):
         sys.exit(1)
 
     whitelisted_barcodes = get_whitelisted_barcodes(barcode_path)
-    barcodes = get_barcodes_from_fastq(fastq_path)
+    if not do_test:
+        barcodes = get_barcodes_from_fastq(fastq_path)
+    else:
+        barcodes = test()    
     barcode_stats = examine_barcodes(barcodes,whitelisted_barcodes)
     write_barcode_stats(barcode_stats, output_path)
 
