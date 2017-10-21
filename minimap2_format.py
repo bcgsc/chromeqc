@@ -5,9 +5,8 @@ import sys
 # Example usage:
 # cat sam_file.sam | python3 minimap2_format.py 18
 
-def main():
-    barcode_length = int(sys.argv[1])
 
+def format_sam(barcode_length):
     for read in sys.stdin.readlines():
         # Skip header
         if read[0] == "@":
@@ -18,6 +17,11 @@ def main():
         new_name = read_name[barcode_length:]
         new_line = new_name + "\t".join(parsed_line[1:]) + "\t BX:{}".format(barcode)
         print(new_line)
+
+
+def main():
+    barcode_length = int(sys.argv[1])
+    format_sam(barcode_length)
 
 
 if __name__ == "__main__":
