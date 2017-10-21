@@ -1,9 +1,11 @@
 *.bam
 *.bam.bai
+*.bed
 *.fq.gz
 *.html
 *.log
 *.loupe
+*.molecule.tsv
 *.pdf
 *.sam.gz
 *_lrbasic/
