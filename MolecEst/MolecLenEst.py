@@ -65,6 +65,7 @@ class MolecIdentifier:
         prevBarcode = ""
         prevChr = ""
         curReads = []
+        trueMolecs = {}
         
         newMolecID = 0
         for read in samfile:
@@ -112,10 +113,7 @@ class MolecIdentifier:
                                          interArrivals, \
                                          totalBases, totalAS)
                         
-                        if  len(interArrivals) >= self._min:
-                            molec.printAsTsv(newMolecFH, count)
-                        else:
-                            molec.printAsTsv(newMolecFH, count)
+                        molec.printAsTsv(newMolecFH, count)
                         if read.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -159,11 +157,7 @@ class MolecIdentifier:
                     prevVal = value
                 end = prevVal + read.query_alignment_length
                 molec = Molecule(chr, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
-                max = 0;
-                if  len(interArrivals) >= self._maxDist:
-                    molec.printAsTsv(newMolecFH, count)
-                else:
-                    molec.printAsTsv(newMolecFH, count)
+                molec.printAsTsv(newMolecFH, count)
                 newMolecID += 1
                 curReads = []
             prevBarcode = barcode;
