@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--seed", action="store", default=1334, type=int, dest="seed")
     parser.add_argument("-m", "--max_read_pairs", action="store", default=MAX_READ_PAIR_DEFAULT, type=int, dest="max_read_pair")    
     parser.add_argument("-p", "--stats_out_path", action="store", default='.', type=str, dest="stats_out_path")
-    parser.add_argument("-v", "--verbose", action="store", default=True, type=bool, dest="verbose")   
+    parser.add_argument("-v", "--verbose", action="store", default='True', type=str, dest="verbose")   
 
 
     args = parser.parse_args()
@@ -55,4 +55,4 @@ if __name__ == "__main__":
                             subset_size=args.subsample_size,
                             random_seed=args.seed,
                             max_read_pairs=-1,
-                            verbose=True)
+                            verbose=args.verbose=='True')
