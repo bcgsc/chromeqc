@@ -44,9 +44,9 @@ class MolecIdentifier:
         self._min = min
     
     def setMAPQ(self, mapq):
-        self._mapq = 4
+        self._mapq = mapq
     
-    def __init__(self, filename, outPrefix, faiFile):
+    def __init__(self, filename, outPrefix):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
         @todo: Possible to thread per contig
@@ -197,4 +197,4 @@ if __name__ == '__main__':
             molecID.setMAPQ(options.mapq)
         molecID.run()
     else:
-        print("Missing required options -b -o -f")
+        print("Missing required options -b -o")
