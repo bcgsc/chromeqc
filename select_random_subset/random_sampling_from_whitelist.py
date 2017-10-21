@@ -18,12 +18,13 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--random_seed", action="store", default=1334, type=int, dest="seed")
     parser.add_argument("-m", "--max_read_pairs", action="store", default=MAX_READ_PAIR_DEFAULT, type=int, dest="max_read_pair")    
     parser.add_argument("-p", "--stats_out_path", action="store", default='.', type=str, dest="stats_out_path")
-    parser.add_argument("-v", "--verbose", action='store_true')   
+    parser.add_argument("-v", "--verbose", action='store_true', dest="verbose")   
 
 
     args = parser.parse_args()
     
-    print(args)
+    if args.verbose:
+        print(args, file=sys.stderr)
     
     # Open whitelist
     whitelist_file = ''
