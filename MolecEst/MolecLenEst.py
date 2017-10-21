@@ -46,7 +46,7 @@ class MolecIdentifier:
     def setMAPQ(self, mapq):
         self._mapq = mapq
     
-    def __init__(self, filename, outPrefix):
+    def __init__(self, filename):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
         @todo: Possible to thread per contig
@@ -57,7 +57,7 @@ class MolecIdentifier:
         samfile = pysam.AlignmentFile(filename, "rb")
         self._molec = {}
         
-    def run(self):
+    def run(self, outPrefix):
         
         newMolecFH = open(outPrefix + ".tsv", "w"); 
         outfilebam = pysam.Samfile(outPrefix + ".bam", "wb", template=samfile)
@@ -188,13 +188,13 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()  
   
     if options.bam and options.output:
-        molecID = MolecIdentifier(options.bam, options.output)
+        molecID = MolecIdentifier(options.bam)
         if options.dist:
             molecID.setDist(options.dist)
         if options.min:
             molecID.setMin(options.min)
         if options.mapq:
             molecID.setMAPQ(options.mapq)
-        molecID.run()
+        molecID.run(options.output)
     else:
         print("Missing required options -b -o")
