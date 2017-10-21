@@ -142,6 +142,7 @@ class ProcessFastQBarCodes:
                         break
 
                 if file_out is not None and do_output_read:
+                    read_name_raw = '@{}-1_{} BX:Z:{}-1\n'.format(read_barcode, read_name_raw[1:-1], read_barcode)
                     file_out.write(read_name_raw)
                     file_out.write(read_seq_raw)
                     file_out.write(read_line3_raw)
@@ -229,9 +230,10 @@ if __name__ == '__main__':
     with open(barcode_filename, 'r') as f:
         p = ProcessFastQBarCodes(barcode_whitelist_file=f, max_read_pairs=-1, stats_path='select_random_subset/')
         with gzip.open(fastq_filename, 'r') as file_in:
-            p.process_fastq(file_in=file_in, file_out=None)  # file_out=sys.stdout)
+            p.process_fastq(file_in=file_in, file_out=sys.stdout)
 
 
 """
+@BARCODE-1_...
 adapter dimer. p5-template-p7.
 """
