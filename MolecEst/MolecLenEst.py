@@ -159,7 +159,7 @@ class MolecIdentifier:
                     if max < trueMolecs[molecID]:
                         maxMolec = molecID
                         max = trueMolecs[molecID]
-                if  len(interArrivals) >= self._threshold and maxMolec in self._molec:
+                if  len(interArrivals) >= self._maxDist and maxMolec in self._molec:
                     molec.printAsTsv(newMolecFH, self._molec[maxMolec], maxMolec, count)
                 else:
                     molec.printAsTsv(newMolecFH, BedMolec("NA", 0, 0, 0), maxMolec, count)
