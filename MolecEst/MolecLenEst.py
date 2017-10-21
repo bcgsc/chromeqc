@@ -134,7 +134,7 @@ class MolecIdentifier:
                     
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
-                        end = prevVal + prevRead.query_alignment_length
+                        end = prevRead.reference_end
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
@@ -190,7 +190,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                     prevRead = curRead
-                end = prevVal + prevRead.query_alignment_length
+                end = prevRead.reference_end
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
                 if count >= self._min:
                     self.printTSV(molec)
