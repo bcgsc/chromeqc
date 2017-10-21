@@ -1,0 +1,31 @@
+run on:
+2013 MacBook Pro
+2.7 GHz Intel Core i7
+
+time bwa mem -C ../data/GRCh38.fa hg002g1_small.fq  > /dev/null 2> timing.txt
+[M::bwa_idx_load_from_disk] read 0 ALT contigs
+[M::process] read 71686 sequences (10000197 bp)...
+[M::process] read 71686 sequences (10000197 bp)...
+[M::mem_process_seqs] Processed 71686 reads in 47.791 CPU sec, 48.020 real sec
+[M::process] read 71686 sequences (10000197 bp)...
+[M::mem_process_seqs] Processed 71686 reads in 40.431 CPU sec, 40.338 real sec
+[M::process] read 71686 sequences (10000197 bp)...
+[M::mem_process_seqs] Processed 71686 reads in 41.872 CPU sec, 41.811 real sec
+[M::process] read 71054 sequences (9912033 bp)...
+[M::mem_process_seqs] Processed 71686 reads in 43.953 CPU sec, 44.272 real sec
+[M::mem_process_seqs] Processed 71054 reads in 44.076 CPU sec, 44.258 real sec
+[main] Version: 0.7.15-r1140
+[main] CMD: bwa mem -C ../data/GRCh38.fa hg002g1_small.fq
+[main] Real time: 232.547 sec; CPU: 223.277 sec
+      232.56 real       210.96 user        12.32 sys
+
+time minimap2 -t1 -sr ../data/GRCh38.mmi hg002g1_small.fq > /dev/null 2>> timing.txt
+[M::main::20.690*0.66] loaded/built the index for 194 target sequence(s)
+[M::mm_mapopt_update::26.320*0.72] mid_occ = 705
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_HPC: 0; #seq: 194
+[M::mm_idx_stat::27.665*0.73] distinct minimizers: 100159079 (38.79% are singletons); average occurrences: 5.540; average spacing: 5.586
+[M::worker_pipeline::65.473*0.83] mapped 357798 sequences
+[M::main] Version: 2.2-r409
+[M::main] CMD: minimap2 -t1 -sr ../data/GRCh38.mmi hg002g1_small.fq
+[M::main] Real time: 67.044 sec; CPU: 55.962 sec
+       67.06 real        36.24 user        19.72 sys

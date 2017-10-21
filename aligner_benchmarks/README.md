@@ -1,0 +1,3 @@
+# Testing aligners...
+- Minimap2
+- BWA MEM
