@@ -58,7 +58,7 @@ class MolecIdentifier:
         
     def printTSV(self, molec):
         if self._tsvFilename:
-            self._newMolecFH(molec.asTSV() + "\n")
+            self._newMolecFH.write(molec.asTSV() + "\n")
         else:
             print(molec.asTSV())
     
@@ -77,6 +77,8 @@ class MolecIdentifier:
         samfile = pysam.AlignmentFile(self._filename, "rb")
         if self._newBamFilename:
             self._outfilebam = pysam.AlignmentFile(self._newBamFilename, "wb", template=samfile)
+        else:
+            self._outfilebam = None
         
         header = "BX\tMI\tRname\tStart\tEnd\tReads"
         if self._tsvFilename:
@@ -197,9 +199,10 @@ class MolecIdentifier:
             prevChr = read.reference_id
         
         #clean up
-        outfilebam.close()
+        if self._outfilebam != None:
+            self._outfilebam.close()
         samfile.close()
-        newMolecFH.close()
+        self._newMolecFH.close()
     
 if __name__ == '__main__':
     
