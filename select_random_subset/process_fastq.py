@@ -11,10 +11,14 @@ class ProcessFastQBarCodes:
     """
 
     """
+    STAT_SAVE_FREQUENCY = 1000000  # how often to save stats (number of pair-end reads)
+    PROGRESS_PRINT_FREQUENCY = 100000  # how often to print progress (number of pair-end reads)
+
     def __init__(self):
         self.standard_barcodes = {}  # dict of the white listed barcodes mapped to read-pair count
         self.unmatched_barcodes = {}
         self.num_unmatched_barcodes = 0
+        self.read_pairs_processed = 0
 
     def read_standard_barcodes(self, barcode_filename):
         """
@@ -46,6 +50,7 @@ class ProcessFastQBarCodes:
                     _ = fq.readline()
                     read_qual = fq.readline().decode("utf-8")[:-1]
                     is_read1 = read_index % 2 == 0
+
                     if is_read1:
                         read_barcode = str(read_seq[:16])
                         read_barcode_count = self.standard_barcodes.get(read_barcode, -1)
@@ -56,33 +61,43 @@ class ProcessFastQBarCodes:
                             self.standard_barcodes[read_barcode] = read_barcode_count + 1
                     else: # read2
                         if read_name != prev_read_name:
-                            print("Mismatched reads at read index {}".format(read_index))
+                            print("Mismatched reads at read index {:,}".format(read_index))
                     prev_read_name = read_name
                     read_index += 1
-                    if read_index % 100000 == 0:
-                        print("Processed {} pair of reads. found {}({}%) unmatched barcodes ({} unique)".format(
-                            read_index / 2,
-                            self.num_unmatched_barcodes,
-                            round(2 * 100.0 * self.num_unmatched_barcodes / read_index, 1),
-                            len(self.unmatched_barcodes)))
-                    if max_read_pairs > 0 and read_index/2 >= max_read_pairs:
+                    self.read_pairs_processed = read_index // 2
+
+                    if read_index % (self.PROGRESS_PRINT_FREQUENCY * 2) == 0:
+                        self.print_progress()
+
+                    if read_index % (self.STAT_SAVE_FREQUENCY * 2) == 0:
+                        self.save_stats()
+
+                    if max_read_pairs > 0 and self.read_pairs_processed >= max_read_pairs:
                         break
+
                 except EOFError:
                     pass
 
-        print("Total: {} pair of reads. found {}({}%) unmatched barcodes ({} unique)".format(
-            read_index / 2,
+        self.print_progress()
+        self.save_stats()
+
+    def print_progress(self):
+        print("Processed {:,} pair of reads. found {:,}({}%) unmatched barcodes ({:,} unique)".format(
+            self.read_pairs_processed,
             self.num_unmatched_barcodes,
-            round(2 * 100.0 * self.num_unmatched_barcodes / read_index, 1),
+            round(100.0 * self.num_unmatched_barcodes / self.read_pairs_processed, 1),
             len(self.unmatched_barcodes)))
+
+    def save_stats(self):
         # create histograms
-        self.plot_histogram_of_counts(self.standard_barcodes, filename_prefix='select_random_subset/standard_barcodes',
-                                      title='population count for standard barcodes for {} read pairs'.format(max_read_pairs))
-        self.plot_histogram_of_counts(self.unmatched_barcodes, filename_prefix='select_random_subset/unmatched_barcodes',
-                                      title='population counts for unmatched barcodes for {} read pairs'.format(max_read_pairs))
+        self.save_stats_of_counts(self.standard_barcodes, filename_prefix='select_random_subset/standard_barcodes',
+                                  title='population count for standard barcodes for {} read pairs'.format(self.read_pairs_processed))
+        self.save_stats_of_counts(self.unmatched_barcodes, filename_prefix='select_random_subset/unmatched_barcodes',
+                                  title='population counts for unmatched barcodes for {} read pairs'.format(self.read_pairs_processed))
+
 
     @staticmethod
-    def plot_histogram_of_counts(dict_counts, filename_prefix, title = '', remove_zeros=True):
+    def save_stats_of_counts(dict_counts, filename_prefix, title ='', remove_zeros=True):
         sorted_list = [x for x in sorted(list(dict_counts.items()), key=lambda x: x[1], reverse=True) if x[1] > 0]
         if remove_zeros:
             sorted_list = [x for x in sorted_list if x[1] > 0]
@@ -117,4 +132,4 @@ if __name__ == '__main__':
     fastq_filename = 'data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz'
     p = ProcessFastQBarCodes()
     p.read_standard_barcodes(barcode_filename)
-    p.process_fastq(fastq_filename, max_read_pairs=1000000)
+    p.process_fastq(fastq_filename, max_read_pairs=-1)
