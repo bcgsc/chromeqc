@@ -26,11 +26,12 @@ class Molecule:
         self.interArrivals = interArrivals
         self.totalBases = totalBases
         self.alignScore = alignScore
+        self.count = count
     
     def asTSV(self):
         return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(len(self.interArrivals) + 2))
+                 + "\t" + str(count))
         
     def getLength(self):
         return self.end-self.start
@@ -140,7 +141,7 @@ class MolecIdentifier:
                         molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
-                                         totalBases, totalAS)
+                                         totalBases, totalAS, count)
                         if curRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -187,7 +188,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + curRead.query_alignment_length
-                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
+                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
                 if len(interArrivals) >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
