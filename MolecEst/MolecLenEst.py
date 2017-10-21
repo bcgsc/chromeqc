@@ -31,7 +31,7 @@ class Molecule:
     def asTSV(self):
         return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(count))
+                 + "\t" + str(self.count))
         
     def getLength(self):
         return self.end-self.start
