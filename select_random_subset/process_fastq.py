@@ -6,6 +6,7 @@ import gzip
 import matplotlib.pyplot as plt
 # from Bio import SeqIO
 
+
 class ProcessFastQBarCodes:
     """
 
@@ -75,13 +76,13 @@ class ProcessFastQBarCodes:
             round(2 * 100.0 * self.num_unmatched_barcodes / read_index, 1),
             len(self.unmatched_barcodes)))
         # create histograms
-        self.plot_histogram_of_counts(self.standard_barcodes, filename='select_random_subset/standard_barcodes.pdf',
+        self.plot_histogram_of_counts(self.standard_barcodes, filename_prefix='select_random_subset/standard_barcodes',
                                       title='population count for standard barcodes for {} read pairs'.format(max_read_pairs))
-        self.plot_histogram_of_counts(self.unmatched_barcodes, filename='select_random_subset/unmatched_barcodes.pdf',
+        self.plot_histogram_of_counts(self.unmatched_barcodes, filename_prefix='select_random_subset/unmatched_barcodes',
                                       title='population counts for unmatched barcodes for {} read pairs'.format(max_read_pairs))
 
     @staticmethod
-    def plot_histogram_of_counts(dict_counts, filename, title = '', remove_zeros=True):
+    def plot_histogram_of_counts(dict_counts, filename_prefix, title = '', remove_zeros=True):
         sorted_list = [x for x in sorted(list(dict_counts.items()), key=lambda x: x[1], reverse=True) if x[1] > 0]
         if remove_zeros:
             sorted_list = [x for x in sorted_list if x[1] > 0]
@@ -92,15 +93,22 @@ class ProcessFastQBarCodes:
         for x in sorted_list:
             count_hist[x[1] - min_count] += 1
 
-        print(title)
-        print('\n'.join(['{}: {}'.format(i+min_count, j) for i, j in enumerate(count_hist)]))
+        filename_prefix
+        with open(filename_prefix + "_population_counts.tsv", "w") as f:
+            f.write('reads_in_population\tpopulation_count\n')
+            f.write('\n'.join(['{}\t{}'.format(i+min_count, j) for i, j in enumerate(count_hist)]))
+
+        # print("Top 100 size tags")
+        with open(filename_prefix + "_top_barcodes.tsv", "w") as f:
+            f.write('barcode\tread_count\n')
+            f.write('\n'.join(['{}\t{}'.format(x[0], x[1]) for x in sorted_list[:100]]))
 
         plt.style.use('seaborn-whitegrid')
         plt.plot(range(min_count, max_count + 1), count_hist)
         plt.xlabel('population')
         plt.ylabel('#per population')
         plt.title(title)
-        plt.savefig(filename)
+        plt.savefig(filename_prefix + ".pdf")
         plt.clf()
 
 
