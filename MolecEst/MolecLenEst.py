@@ -54,12 +54,13 @@ class MolecIdentifier:
         self._min = 4
         self._maxDist = 50000
         self._mapq = 1
-        samfile = pysam.AlignmentFile(filename, "rb")
         self._molec = {}
+        self._filename = filename;
         
     def run(self,outPrefix):
         
-        newMolecFH = open(outPrefix + ".tsv", "w"); 
+        newMolecFH = open(outPrefix + ".tsv", "w");
+        samfile = pysam.AlignmentFile(self._filename, "rb")
         outfilebam = pysam.AlignmentFile(outPrefix + ".bam", "wb", template=samfile)
         
         prevBarcode = ""
