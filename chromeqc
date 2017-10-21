@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+import subprocess
+
+def preprocess(argv):
+    
+    return None
+
+def align(argv):
+    return None
+
+def stats(argv):
+    return None
+
+def main(argv):
+    parser = argparse.ArgumentParser()
+
+    subparsers = parser.add_subparsers()
+
+    preprocess_subparser = subparsers.add_parser('preprocess', help='preprocess help')
+    preprocess_subparser.add_argument('fastq', nargs='*', help='paths raw chromium FASTQ files')
+    preprocess_subparser.add_argument('whitelist', type=str, help='path to whitelisted barcodes')
+    preprocess_subparser.add_argument('output_dir', type=str, help='output dir') 
+    preprocess_subparser.set_defaults(func=preprocess)
+    
+    align_subparser = subparsers.add_parser('align', help='align help')
+    align_subparser.add_argument('fastq', nargs='*', help='preprocessed chromium FASTQ files')
+    align_subparser.add_argument('output_dir', type=str, help='output dir')
+    preprocess_subparser.set_defaults(func=align)
+
+    stats_subparser = subparsers.add_parser('stats', help='stat help')
+    stats_subparser.add_argument('alignment', nargs='*', help='path to chromium reads alignment')
+    stats_subparser.add_argument('output_dir', type=str, help='output dir')
+    stats_subparser.set_defaults(func=stats)
+
+    args.func(args)
+
+if __name__ == "__main__":
+    main(sys.argv)

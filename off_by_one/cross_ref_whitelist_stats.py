@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-from __future__ import division
+#from __future__ import division
 import sys
 import getopt
 
 MATCH = "match"
 OFF_BY_ONE = "off by one"
 NO_MATCH = "no match"
+NUM = "number of barcodes"
 
 def get_whitelisted_barcodes(barcode_path):
     '''
@@ -39,6 +40,8 @@ def get_barcodes_from_fastq(fastq_path):
                 barcode = line[colon_index+1:dash_index]
                 if len(barcode) == 16:
                     barcodes.append(barcode)
+    if len(barcodes) == 0:
+        print("No barcodes!")
     return barcodes
 
 def matched_off_by_one(barcode,whitelisted_barcodes):
@@ -78,19 +81,18 @@ def examine_barcodes(barcodes,whitelisted_barcodes):
         else:
             barcode_stats[NO_MATCH] += 1
     num_barcodes = len(barcodes)
-    print("Number of barcodes: %d" % (num_barcodes))
-    for stat in barcode_stats:
-        barcode_stats[stat] = barcode_stats[stat]/num_barcodes 
+    barcode_stats[NUM] = num_barcodes
     return barcode_stats
 
 def write_barcode_stats(barcode_stats, output_path):
     '''
     Print the results of the barcode whitelist cross reference and write the output to a file
     '''
-    match_line = "Matches: %f" % (barcode_stats[MATCH])
-    off_by_one_line = "Off by one: %f" % (barcode_stats[OFF_BY_ONE])
-    no_match_line = "No match: %f" % (barcode_stats[NO_MATCH])
-    lines = [match_line,off_by_one_line,no_match_line]
+    match_line = "Matches: %d" % (barcode_stats[MATCH])
+    off_by_one_line = "Off by one: %d" % (barcode_stats[OFF_BY_ONE])
+    no_match_line = "No match: %d" % (barcode_stats[NO_MATCH])
+    num_barcodes = "Number of barcodes: %d" % (barcode_stats[NUM])
+    lines = [match_line,off_by_one_line,no_match_line,num_barcodes]
 
     with open(output_path,'w') as output_file:
         for line in lines:

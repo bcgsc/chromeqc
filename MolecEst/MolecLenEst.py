@@ -77,13 +77,16 @@ class MolecIdentifier:
         samfile = pysam.AlignmentFile(self._filename, "rb")
         if self._newBamFilename:
             self._outfilebam = pysam.AlignmentFile(self._newBamFilename, "wb", template=samfile)
+        else:
+            self._outfilebam = None
         
         header = "BX\tMI\tRname\tStart\tEnd\tReads"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
-            self._newMolecFH.write(header + "]n")
+            self._newMolecFH.write(header + "\n")
         else:
-            print(header + "\t")
+            self._newMolecFH = None
+            print(header)
             
         prevBarcode = ""
         prevChr = ""
@@ -197,9 +200,11 @@ class MolecIdentifier:
             prevChr = read.reference_id
         
         #clean up
-        outfilebam.close()
         samfile.close()
-        newMolecFH.close()
+        if self._newMolecFH != None:
+            self._newMolecFH.close()
+        if self._outfilebam != None:
+            self._outfilebam.close()
     
 if __name__ == '__main__':
     
