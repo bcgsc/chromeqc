@@ -1,6 +1,6 @@
 # Usage
 ```
-python3 random_sampling_from_whitelist [arguments and their values]
+python3 random_sampling_from_whitelist.py [arguments and their values]
 ```
 # Arguments
 ```
@@ -12,4 +12,9 @@ python3 random_sampling_from_whitelist [arguments and their values]
 -m --max_read_pairs: default=-1                  , type=int  , note: -1 means all read pairs
 -p --stats_out_path: default='.'                 , type=str  , note: the directory needs to be created already
 -v --verbose       : default=False               , no value  , note: If supplied, will be set to true, else will be false.
+```
+
+# Example
+```
+python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
 ```

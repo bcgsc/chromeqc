@@ -91,7 +91,7 @@ class ProcessFastQBarCodes:
         Returns: None
         """
 
-        self.eprint('Reading fastq file: {} ...')
+        self.eprint('Reading fastq file...')
         read_index = 0
         prev_read_name = None
         do_output_read = False
