@@ -27,7 +27,7 @@ class Molecule:
         self.totalBases = totalBases
         self.alignScore = alignScore
     
-    def printAsTsv(self, fh, molec, count):
+    def printAsTsv(self, fh, count):
         fh.write(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.contig) + "\t" + str(self.start) + "\t" + str(self.end) \
                  + "\t" + str(len(self.interArrivals) + 2) + "\n")
@@ -54,7 +54,6 @@ class MolecIdentifier:
         self._min = 4
         self._maxDist = 50000
         self._mapq = 1
-        self._molec = {}
         self._filename = filename;
         
     def run(self,outPrefix):
@@ -114,9 +113,9 @@ class MolecIdentifier:
                                          totalBases, totalAS)
                         
                         if  len(interArrivals) >= self._min:
-                            molec.printAsTsv(newMolecFH, self._molec[maxMolec], maxMolec, count)
+                            molec.printAsTsv(newMolecFH, count)
                         else:
-                            molec.printAsTsv(newMolecFH, BedMolec("NA", 0, 0, 0), maxMolec, count)
+                            molec.printAsTsv(newMolecFH, count)
                         if read.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -128,7 +127,6 @@ class MolecIdentifier:
                         read.tags += [("MI", newMolecID)]
                         outfilebam.write(read)
                         interArrivals = []
-                        trueMolecs = {}
                         prevVal = value
                         totalBases = 0;
                         totalAS = 0;
@@ -161,16 +159,11 @@ class MolecIdentifier:
                     prevVal = value
                 end = prevVal + read.query_alignment_length
                 molec = Molecule(chr, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
-                maxMolec = "NA";
                 max = 0;
-                for molecID in trueMolecs:
-                    if max < trueMolecs[molecID]:
-                        maxMolec = molecID
-                        max = trueMolecs[molecID]
-                if  len(interArrivals) >= self._maxDist and maxMolec in self._molec:
-                    molec.printAsTsv(newMolecFH, self._molec[maxMolec], maxMolec, count)
+                if  len(interArrivals) >= self._maxDist:
+                    molec.printAsTsv(newMolecFH, count)
                 else:
-                    molec.printAsTsv(newMolecFH, BedMolec("NA", 0, 0, 0), maxMolec, count)
+                    molec.printAsTsv(newMolecFH, count)
                 newMolecID += 1
                 curReads = []
             prevBarcode = barcode;
