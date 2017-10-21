@@ -190,15 +190,14 @@ Alignment Program Name
 Row 
 -------------------------------------
 
-Calculations from SAM files; Compare with Long Ranger Estimates that are somewhat similiar
+Calculations from SAM files
 
-|Long_Ranger_Metric                      |Long_Ranger_Estimate |SAM_Metric                      |Calculated_from_SAM |
-|:--------------------------------------|:--------------------|:-------------------------------|:-------------------|
-|Mean length +/- s.d                    | `r digi(g2$molecule_length_mean/1000)` kbp +/- `r digi(g2$molecule_length_stddev/1000)` kbp             |Size of the molecules           |-                   |
-|Mean DNA per GEM                       | `r digi(g2$mean_dna_per_gem)` read pairs`           |Number of reads per molecule    |-                   |
-|NA                                     |-                    |Number of molecules per barcode |-                   |
-|N50, read-pairs per input DNA molecule |   `r g2$n50_linked_reads_per_molecule`                 |Amount of DNA per barcode       |-                   |
-
+|Metric_SAM                      |Calculated_from_SAM |
+|:-------------------------------|:-------------------|
+|Size of the molecules           |-                   |
+|Number of reads per molecule    |-                   |
+|Number of molecules per barcode |-                   |
+|Amount of DNA per barcode       |-                   |
 
 <!--Third page introduced so that molecule and barcode statistics for SAM files
 from alignment program other than Long Ranger can be reported-->
