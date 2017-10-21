@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 Created on Monday, May 15 2017
 Last Updated Friday, Oct 20 2017
@@ -78,7 +79,7 @@ class MolecIdentifier:
                 continue
             
             chr = read.reference_id
-            if prevBarcode != barcode && read.reference_id:
+            if prevBarcode != barcode and read.reference_id:
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
@@ -196,4 +197,4 @@ if __name__ == '__main__':
             molecID.setMAPQ(options.mapq)
         molecID.run()
     else:
-        print 'Missing required options -b -o -f'
+        print("Missing required options -b -o -f")
