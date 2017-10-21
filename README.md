@@ -25,7 +25,7 @@ python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -
 ```
 python3 chromeQC
 ```
-## How chromeQC Works
+## How ChromeQC Works
 
 ## Prerequisites
 ```
