@@ -14,19 +14,31 @@ class ProcessFastQBarCodes:
     STAT_SAVE_FREQUENCY = 1000000  # how often to save stats (number of pair-end reads)
     PROGRESS_PRINT_FREQUENCY = 100000  # how often to print progress (number of pair-end reads)
 
-    def __init__(self):
+    def __init__(self, barcode_whitelist_file, fastq_file, stats_path='.',
+                 subset_size = 4000, random_seed = 1337, max_read_pairs = -1, verbose=True):
+        """
+        Args:
+            barcode_whitelist_file:
+            fastq_file:
+            subset_size:
+            random_seed:
+            max_read_pairs:
+        """
         self.standard_barcodes = {}  # dict of the white listed barcodes mapped to read-pair count
         self.unmatched_barcodes = {}
         self.num_unmatched_barcodes = 0
         self.read_pairs_processed = 0
+        self._read_standard_barcodes(barcode_whitelist_file)
+        self.verbose = verbose
 
-    def read_standard_barcodes(self, barcode_filename):
+    def _read_standard_barcodes(self, barcode_filename):
         """
         Read the white listed barcodes.
         Args:
             barcode_filename: standard barcodes are extracted from longranger tool:
             longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
         """
+        if self.verbose
         print('Reading standard (white listed) barcodes ...')
         with open(barcode_filename, 'r') as f:
             for line in f.readlines():
@@ -37,7 +49,10 @@ class ProcessFastQBarCodes:
 
         print('[Done]. read {} records'.format(len(self.standard_barcodes)))
 
-    def process_fastq(self, fastq_filename, max_read_pairs=100000):
+    def _create_barcode_subset(self):
+        pass
+
+    def process_fastq(self, file_in, file_out, max_read_pairs=100000):
         # process the fastq file
         print('Reading fastq file: {} ...'.format(fastq_filename))
         read_index = 0
@@ -130,6 +145,7 @@ class ProcessFastQBarCodes:
 if __name__ == '__main__':
     barcode_filename = 'data/barcode.txt'
     fastq_filename = 'data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz'
+
     p = ProcessFastQBarCodes()
     p.read_standard_barcodes(barcode_filename)
     p.process_fastq(fastq_filename, max_read_pairs=-1)
