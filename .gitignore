@@ -1,9 +1,11 @@
 *.bam
 *.bam.bai
+*.bed
 *.fq.gz
 *.html
 *.log
 *.loupe
+*.molecule.tsv
 *.pdf
 *.sam.gz
 *_lrbasic/
@@ -12,4 +14,5 @@
 data/*
 !*_lrwgsvc/outs/summary.csv
 !*_lrwgsvc/outs/summary.png
+!multiqc/*.html
 !data/README.md

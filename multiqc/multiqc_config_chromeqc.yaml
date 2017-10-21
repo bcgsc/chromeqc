@@ -1,3 +1,7 @@
+# Default output filenames
+output_fn_name: multiqc_report_chromeqc.html
+data_dir_name: multiqc_data_chromeqc
+
 extra_fn_clean_exts:
     - .tsv
     - .csv
@@ -22,19 +26,11 @@ num_datasets_plot_limit: 50      # If interactive, don't plot on load if > this 
 max_table_rows: 500              # Swap tables for a beeswarm plot above this
 
 custom_data:
-    longranger_basic:
+    chromeqc_molecule_size:
         file_format: 'csv'
-        section_name: 'LongRanger basic'
-        description: 'This table summarises the Long Ranger basic summary of each subsample'
-        plot_type: 'table'
-    longranger_wgs:
-        file_format: 'csv'
-        section_name: 'LongRanger wgs'
-        description: 'This table summarises the Long Ranger wgs summary of each subsample'
-        plot_type: 'table'
-
+        section_name: 'Molecule size'
+        description: 'Density plots of Chromium molecule size'
+        plot_type: 'linegraph'
 sp:
-    longranger_basic:
-        fn: '*basic_summary.csv'
-    longranger_wgs:
-        fn: '*wgs_summary.csv'
+    chromeqc_molecule_size:
+        fn: '*chromqc_molecule_size.csv'

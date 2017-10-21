@@ -28,10 +28,10 @@ time=command time -v -o $@.time
 
 .DELETE_ON_ERROR:
 .SECONDARY:
-.PHONY: all lrbasic lrwgsvc bwa bcalm paper sortbx
+.PHONY: all lrbasic lrwgsvc bwa bcalm paper sortbx molecule
 
 # Run the entire analysis.
-all: data/SHA256 lrbasic lrwgsvc bwa
+all: data/SHA256 lrbasic lrwgsvc bwa sortbx molecule
 
 # Extract the barcodes from the reads using Longranger basic.
 lrbasic: \
@@ -56,6 +56,12 @@ sortbx: \
 	hg002g1.lrbasic.bwa.sortbx.sam.gz \
 	hg003g1.lrbasic.bwa.sortbx.sam.gz \
 	hg004g1.lrbasic.bwa.sortbx.sam.gz
+
+# Compute molecules coordinates from SAM sorted by barcode then position.
+molecule: \
+	hg002g1.lrbasic.bwa.sortbx.molecule.tsv \
+	hg003g1.lrbasic.bwa.sortbx.molecule.tsv \
+	hg004g1.lrbasic.bwa.sortbx.molecule.tsv
 
 # Assemble reads with BCALM.
 bcalm: hg004g.lrbasic.bcalm.k$k.a$(abundance).fa
@@ -210,6 +216,12 @@ data/SHA256: \
 # Assemble unitigs with BCALM.
 %.fa: %.h5
 	$(time) bglue -in $< -out $@ -k $k -nb-cores $t
+
+# ChromeQC
+
+# Compute molecules coordinates from SAM sorted by barcode then position.
+%.sortbx.molecule.tsv: %.sortbx.sam.gz
+	$(time) MolecEst/MolecLenEst.py -b $< -o $@
 
 # Paper
 

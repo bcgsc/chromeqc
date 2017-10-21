@@ -37,6 +37,9 @@ class Molecule:
         
 class MolecIdentifier:
     
+    def setBam(self,bam):
+        self._bam = bam
+    
     def setDist(self, dist):
         self._maxDist = dist
         
@@ -61,19 +64,22 @@ class MolecIdentifier:
         else:
             print(molec.asTSV())
     
-    def __init__(self, filename):
+    def __init__(self):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
         """
         self._min = 4
         self._maxDist = 50000
         self._mapq = 1
-        self._filename = filename;
         self._newBamFilename = ""
         self._tsvFilename = ""
         
     def run(self):
-        samfile = pysam.AlignmentFile(self._filename, "rb")
+        if self._bam:
+            samfile = pysam.AlignmentFile(self._bam, "rb")
+        else:
+            samfile = pysam.AlignmentFile("-", "rb")
+        
         if self._newBamFilename:
             self._outfilebam = pysam.AlignmentFile(self._newBamFilename, "wb", template=samfile)
         else:
@@ -126,7 +132,6 @@ class MolecIdentifier:
                 aScores = []
                 
                 for curRead in curReads:
-                    count += 1
 #                     print(str(curRead.is_reverse) + " " + curRead.reference_name + " " + str(curRead.pos))                    
                     value = curRead.pos
                     absDist = value - prevVal
@@ -135,7 +140,7 @@ class MolecIdentifier:
                     
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
-                        end = prevVal + prevRead.query_alignment_length
+                        end = prevRead.reference_end
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
@@ -149,7 +154,7 @@ class MolecIdentifier:
                             prevVal1 = value
                             prevVal2 = 0
                         start = value;
-                        if len(interArrivals) >= self._min:
+                        if count >= self._min:
                             self.printTSV(molec)
                             newMolecID += 1
                         if self._newBamFilename:
@@ -172,6 +177,7 @@ class MolecIdentifier:
                         if prevVal2 == 0:
                             prevVal2 = value
                             prevVal = value
+                            count += 1
                             continue
                         else:
                             interArrival = value - prevVal2
@@ -180,17 +186,19 @@ class MolecIdentifier:
                         if prevVal1 == 0:
                             prevVal1 = value
                             prevVal = value
+                            count += 1
                             continue
                         else:
                             interArrival = value - prevVal1
                             prevVal1 = value
                     if interArrival > 0:
+                        count += 1
                         interArrivals.append(interArrival)
                     prevVal = value
                     prevRead = curRead
-                end = prevVal + curRead.query_alignment_length
+                end = prevRead.reference_end
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
-                if len(interArrivals) >= self._min:
+                if count >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
                 curReads = []
@@ -210,7 +218,7 @@ if __name__ == '__main__':
     # specify parser options
     parser = OptionParser()
     parser.add_option("-b", "--bam", dest="bam",
-                  help="Reference to genome BAM file", metavar="BAM")
+                  help="Reference to genome BAM file (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
                   help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
@@ -224,18 +232,17 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
+    molecID = MolecIdentifier(options.bam)
     if options.bam:
-        molecID = MolecIdentifier(options.bam)
-        if options.dist:
-            molecID.setDist(options.dist)
-        if options.min:
-            molecID.setMin(options.min)
-        if options.mapq:
-            molecID.setMAPQ(options.mapq)
-        if options.newBam:
-            molecID.setNewBam(options.newBam)
-        if options.output:
-            molecID.setOutput(options.output)
-        molecID.run()
-    else:
-        print("Missing required options -b")
+        molecID.setBAM(options.bam)
+    if options.dist:
+        molecID.setDist(options.dist)
+    if options.min:
+        molecID.setMin(options.min)
+    if options.mapq:
+        molecID.setMAPQ(options.mapq)
+    if options.newBam:
+        molecID.setNewBam(options.newBam)
+    if options.output:
+        molecID.setOutput(options.output)
+    molecID.run()
