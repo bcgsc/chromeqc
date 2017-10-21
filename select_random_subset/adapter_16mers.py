@@ -8,7 +8,7 @@ Created on Sat Oct 21 14:15:18 2017
 @author: nikka.keivanfar
 """
 
-#see also: adapters.fa
+#to do: fasta as input
 
 P5 = 'AATGATACGGCGACCACCGA'
 P7 = 'CAAGCAGAAGACGGCATACGAGAT'
