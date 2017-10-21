@@ -151,7 +151,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + read.query_alignment_length
-                molec = Molecule(chr, start, end, newMolecID, barcode, trueMolecs, interArrivals, totalBases, totalAS)
+                molec = Molecule(chr, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
                 maxMolec = "NA";
                 max = 0;
                 for molecID in trueMolecs:
