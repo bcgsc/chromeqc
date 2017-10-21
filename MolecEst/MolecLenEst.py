@@ -27,10 +27,10 @@ class Molecule:
         self.totalBases = totalBases
         self.alignScore = alignScore
     
-    def printAsTsv(self, fh, count):
-        fh.write(self.barcode + "\t" + str(self.newMolecID) + "\t" \
+    def asTSV(self):
+        return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
                  + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(len(self.interArrivals) + 2) + "\n")
+                 + "\t" + str(len(self.interArrivals) + 2))
         
     def getLength(self):
         return self.end-self.start
@@ -46,6 +46,21 @@ class MolecIdentifier:
     def setMAPQ(self, mapq):
         self._mapq = mapq
     
+    def setNewBam(self, filename):
+        self._newBamFilename = filename
+    
+    def setOutput(self, filename):
+        self._tsvFilename = filename
+        
+    def setMAPQ(self, mapq):
+        self._mapq = mapq
+        
+    def printTSV(self, molec):
+        if self._tsvFilename:
+            self._newMolecFH(molec.asTSV() + "\n")
+        else:
+            print(molec.asTSV())
+    
     def __init__(self, filename):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
@@ -54,14 +69,21 @@ class MolecIdentifier:
         self._maxDist = 50000
         self._mapq = 1
         self._filename = filename;
+        self._newBamFilename = ""
+        self._tsvFilename = ""
         
-    def run(self,outPrefix):
-        
-        newMolecFH = open(outPrefix + ".tsv", "w");
-        newMolecFH.write("BX\tMI\tRname\tStart\tEnd\tReads\n")
+    def run(self):
         samfile = pysam.AlignmentFile(self._filename, "rb")
-        outfilebam = pysam.AlignmentFile(outPrefix + ".bam", "wb", template=samfile)
+        if self._newBamFilename:
+            self._outfilebam = pysam.AlignmentFile(self._newBamFilename, "wb", template=samfile)
         
+        header = "BX\tMI\tRname\tStart\tEnd\tReads"
+        if self._tsvFilename:
+            self._newMolecFH = open(self._tsvFilename, "w");
+            self._newMolecFH.write(header + "]n")
+        else:
+            print(header + "\t")
+            
         prevBarcode = ""
         prevChr = ""
         curReads = []
@@ -76,8 +98,9 @@ class MolecIdentifier:
                 barcode = barcodeList[0][1]
                 curReads.append(read)
             else:
-                outfilebam.write(read)
-                continue
+                if self._newBamFilename:
+                    self._outfilebam.write(read)
+                    continue
             if read.is_unmapped:
                 continue
             if prevBarcode != barcode and read.reference_id != prevChr:
@@ -114,7 +137,7 @@ class MolecIdentifier:
                                          interArrivals, \
                                          totalBases, totalAS)
                         
-                        molec.printAsTsv(newMolecFH, count)
+                        self.printTSV(molec)
                         if read.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -123,8 +146,9 @@ class MolecIdentifier:
                             prevVal2 = 0
                         start = value;
                         newMolecID += 1
-                        read.tags += [("MI", newMolecID)]
-                        outfilebam.write(read)
+                        if self._newBamFilename:
+                            read.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(read)
                         interArrivals = []
                         prevVal = value
                         totalBases = 0;
@@ -132,8 +156,9 @@ class MolecIdentifier:
                         count = 0
                         continue
                     else:
-                        read.tags += [("MI", newMolecID)]
-                        outfilebam.write(read)
+                        if self._newBamFilename:
+                            read.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(read)
                     
                     #inter arrival time is distance between read of the same direction
                     interArrival = 0
@@ -158,11 +183,13 @@ class MolecIdentifier:
                     prevVal = value
                 end = prevVal + read.query_alignment_length
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
-                molec.printAsTsv(newMolecFH, count)
+                self.printTSV(molec)
                 newMolecID += 1
                 curReads = []
             prevBarcode = barcode;
             prevChr = read.reference_id
+        
+        #clean up
         outfilebam.close()
         samfile.close()
         newMolecFH.close()
@@ -176,7 +203,9 @@ if __name__ == '__main__':
     parser.add_option("-d", "--dist", dest="dist",
                   help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
-                  help="Output location of result, will add a suffix to indicate what type of file it is", metavar="OUTPUT")
+                  help="file name of tsv file (optional)", metavar="OUTPUT")
+    parser.add_option("-n", "--new_bam", dest="newBam",
+                  help="new bam file (optional)", metavar="NEWBAM")
     parser.add_option("-m", "--min", dest="min",
                   help="minimum number of reads in alignment to consider [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
@@ -184,7 +213,7 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
-    if options.bam and options.output:
+    if options.bam:
         molecID = MolecIdentifier(options.bam)
         if options.dist:
             molecID.setDist(options.dist)
@@ -192,6 +221,10 @@ if __name__ == '__main__':
             molecID.setMin(options.min)
         if options.mapq:
             molecID.setMAPQ(options.mapq)
-        molecID.run(options.output)
+        if options.newBam:
+            molecID.setNewBam(options.newBam)
+        if options.output:
+            molecID.setOutput(options.output)
+        molecID.run()
     else:
-        print("Missing required options -b -o")
+        print("Missing required options -b")
