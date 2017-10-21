@@ -17,8 +17,8 @@ from optparse import OptionParser
 import pysam
 
 class Molecule:
-    def __init__(self, contig, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
-        self.contig = contig
+    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore):
+        self.rname = rname
         self.start = start
         self.end = end
         self.barcode = barcode
@@ -27,10 +27,10 @@ class Molecule:
         self.totalBases = totalBases
         self.alignScore = alignScore
     
-    def printAsTsv(self, fh, molec, count):
-        fh.write(self.barcode + "\t" + str(self.newMolecID) + "\t" \
-                 + str(self.contig) + "\t" + str(self.start) + "\t" + str(self.end) \
-                 + "\t" + str(len(self.interArrivals) + 2) + "\n")
+    def asTSV(self):
+        return(self.barcode + "\t" + str(self.newMolecID) + "\t" \
+                 + str(self.rname) + "\t" + str(self.start) + "\t" + str(self.end) \
+                 + "\t" + str(len(self.interArrivals) + 2))
         
     def getLength(self):
         return self.end-self.start
@@ -46,26 +46,50 @@ class MolecIdentifier:
     def setMAPQ(self, mapq):
         self._mapq = mapq
     
-    def __init__(self):
+    def setNewBam(self, filename):
+        self._newBamFilename = filename
+    
+    def setOutput(self, filename):
+        self._tsvFilename = filename
+        
+    def setMAPQ(self, mapq):
+        self._mapq = mapq
+        
+    def printTSV(self, molec):
+        if self._tsvFilename:
+            self._newMolecFH(molec.asTSV() + "\n")
+        else:
+            print(molec.asTSV())
+    
+    def __init__(self, filename):
         """
         Constructor, identifies molecules based on inter-arrival time threshold
-        @todo: Possible to thread per contig
         """
         self._min = 4
         self._maxDist = 50000
         self._mapq = 1
-        self._molec = {}
+        self._filename = filename;
+        self._newBamFilename = ""
+        self._tsvFilename = ""
         
-    def run(self, filename, outPrefix):
-        samfile = pysam.AlignmentFile(filename, "rb")
-        newMolecFH = open(outPrefix + ".tsv", "w"); 
-        outfilebam = pysam.Samfile(outPrefix + ".bam", "wb", template=samfile)
+    def run(self):
+        samfile = pysam.AlignmentFile(self._filename, "rb")
+        if self._newBamFilename:
+            self._outfilebam = pysam.AlignmentFile(self._newBamFilename, "wb", template=samfile)
         
-        prevBarcode = "";
+        header = "BX\tMI\tRname\tStart\tEnd\tReads"
+        if self._tsvFilename:
+            self._newMolecFH = open(self._tsvFilename, "w");
+            self._newMolecFH.write(header + "]n")
+        else:
+            print(header + "\t")
+            
+        prevBarcode = ""
         prevChr = ""
         curReads = []
+        trueMolecs = {}
         
-        newMolecID = 0;        
+        newMolecID = 0
         for read in samfile:
             barcode = ""
             # extract barcode
@@ -74,11 +98,13 @@ class MolecIdentifier:
                 barcode = barcodeList[0][1]
                 curReads.append(read)
             else:
-                outfilebam.write(read)
+                if self._newBamFilename:
+                    self._outfilebam.write(read)
+                    continue
+            if read.is_unmapped:
                 continue
-            
-            chr = read.reference_id
-            if prevBarcode != barcode and read.reference_id:
+            if prevBarcode != barcode and read.reference_id != prevChr:
+                rname = read.reference_name
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
@@ -87,6 +113,12 @@ class MolecIdentifier:
                 count = 0
                 totalBases = 0
                 totalAS = 0
+                
+                #mapq values for calculating median
+                mapqs = []
+                #alignment score values for calculating median
+                aScores = []
+                
                 for read in curReads:
                     count += 1
                     
@@ -99,16 +131,13 @@ class MolecIdentifier:
                     if absDist > self._maxDist and prevVal > 0:
                         end = prevVal + read.query_alignment_length
                         
-                        #adjust find distance from nearest read
-                        molec = Molecule(chr, start, end, \
+                        #find distance from nearest read
+                        molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
                                          totalBases, totalAS)
                         
-                        if  len(interArrivals) >= self._min:
-                            molec.printAsTsv(newMolecFH, self._molec[maxMolec], maxMolec, count)
-                        else:
-                            molec.printAsTsv(newMolecFH, BedMolec("NA", 0, 0, 0), maxMolec, count)
+                        self.printTSV(molec)
                         if read.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -117,19 +146,21 @@ class MolecIdentifier:
                             prevVal2 = 0
                         start = value;
                         newMolecID += 1
-                        read.tags += [("MI", newMolecID)]
-                        outfilebam.write(read)
+                        if self._newBamFilename:
+                            read.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(read)
                         interArrivals = []
-                        trueMolecs = {}
                         prevVal = value
                         totalBases = 0;
                         totalAS = 0;
                         count = 0
                         continue
                     else:
-                        read.tags += [("MI", newMolecID)]
-                        outfilebam.write(read)
+                        if self._newBamFilename:
+                            read.tags += [("MI", newMolecID)]
+                            self._outfilebam.write(read)
                     
+                    #inter arrival time is distance between read of the same direction
                     interArrival = 0
                     if read.is_reverse:
                         if prevVal2 == 0:
@@ -151,20 +182,14 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + read.query_alignment_length
-                molec = Molecule(chr, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
-                maxMolec = "NA";
-                max = 0;
-                for molecID in trueMolecs:
-                    if max < trueMolecs[molecID]:
-                        maxMolec = molecID
-                        max = trueMolecs[molecID]
-                if  len(interArrivals) >= self._threshold and maxMolec in self._molec:
-                    molec.printAsTsv(newMolecFH, self._molec[maxMolec], maxMolec, count)
-                else:
-                    molec.printAsTsv(newMolecFH, BedMolec("NA", 0, 0, 0), maxMolec, count)
+                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
+                self.printTSV(molec)
                 newMolecID += 1
-                curReads = ()
-            prevBarcode = barcode;            
+                curReads = []
+            prevBarcode = barcode;
+            prevChr = read.reference_id
+        
+        #clean up
         outfilebam.close()
         samfile.close()
         newMolecFH.close()
@@ -174,11 +199,13 @@ if __name__ == '__main__':
     # specify parser options
     parser = OptionParser()
     parser.add_option("-b", "--bam", dest="bam",
-                  help="Contig to genome BAM file", metavar="BAM")
+                  help="Reference to genome BAM file", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
-                  help="Minimum distance for contigs when considering interarrival times [50000]", metavar="DIST")
+                  help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
-                  help="Output location of result, will add a suffix to indicate what type of file it is", metavar="OUTPUT")
+                  help="file name of tsv file (optional)", metavar="OUTPUT")
+    parser.add_option("-n", "--new_bam", dest="newBam",
+                  help="new bam file (optional)", metavar="NEWBAM")
     parser.add_option("-m", "--min", dest="min",
                   help="minimum number of reads in alignment to consider [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
@@ -186,14 +213,18 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
-    if options.bam and options.output:
-        molecID = MolecIdentifier()
+    if options.bam:
+        molecID = MolecIdentifier(options.bam)
         if options.dist:
             molecID.setDist(options.dist)
         if options.min:
             molecID.setMin(options.min)
         if options.mapq:
             molecID.setMAPQ(options.mapq)
-        molecID.run(options.bam, options.output)
+        if options.newBam:
+            molecID.setNewBam(options.newBam)
+        if options.output:
+            molecID.setOutput(options.output)
+        molecID.run()
     else:
-        print("Missing required options -b -o")
+        print("Missing required options -b")
