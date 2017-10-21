@@ -78,9 +78,10 @@ class MolecIdentifier:
             else:
                 outfilebam.write(read)
                 continue
-            
-            chr = samfile.getrname(read.reference_id)
+            if read.is_unmapped:
+                continue
             if prevBarcode != barcode and read.reference_id != prevChr:
+                rname = read.reference_name
                 prevVal = 0
                 prevVal1 = 0
                 prevVal2 = 0
@@ -108,7 +109,7 @@ class MolecIdentifier:
                         end = prevVal + read.query_alignment_length
                         
                         #find distance from nearest read
-                        molec = Molecule(chr, start, end, \
+                        molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
                                          interArrivals, \
                                          totalBases, totalAS)
@@ -156,7 +157,7 @@ class MolecIdentifier:
                         interArrivals.append(interArrival)
                     prevVal = value
                 end = prevVal + read.query_alignment_length
-                molec = Molecule(chr, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
+                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS)
                 molec.printAsTsv(newMolecFH, count)
                 newMolecID += 1
                 curReads = []
