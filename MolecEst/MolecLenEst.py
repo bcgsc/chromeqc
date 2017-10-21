@@ -126,7 +126,6 @@ class MolecIdentifier:
                 aScores = []
                 
                 for curRead in curReads:
-                    count += 1
 #                     print(str(curRead.is_reverse) + " " + curRead.reference_name + " " + str(curRead.pos))                    
                     value = curRead.pos
                     absDist = value - prevVal
@@ -149,7 +148,7 @@ class MolecIdentifier:
                             prevVal1 = value
                             prevVal2 = 0
                         start = value;
-                        if len(interArrivals) >= self._min:
+                        if count >= self._min:
                             self.printTSV(molec)
                             newMolecID += 1
                         if self._newBamFilename:
@@ -172,6 +171,7 @@ class MolecIdentifier:
                         if prevVal2 == 0:
                             prevVal2 = value
                             prevVal = value
+                            count += 1
                             continue
                         else:
                             interArrival = value - prevVal2
@@ -180,17 +180,19 @@ class MolecIdentifier:
                         if prevVal1 == 0:
                             prevVal1 = value
                             prevVal = value
+                            count += 1
                             continue
                         else:
                             interArrival = value - prevVal1
                             prevVal1 = value
                     if interArrival > 0:
+                        count += 1
                         interArrivals.append(interArrival)
                     prevVal = value
                     prevRead = curRead
-                end = prevVal + curRead.query_alignment_length
+                end = prevVal + prevRead.query_alignment_length
                 molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
-                if len(interArrivals) >= self._min:
+                if count >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
                 curReads = []
