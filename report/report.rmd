@@ -10,10 +10,84 @@ library(dplyr)
 library(flexdashboard)
 library(ggplot2)
 library(here)
+library(knitr)
 library(readr)
+library(scales)
+library(tibble)
 
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+# Summary
+
+## Column
+
+```{r read-molecules, include=F}
+molecules_orig <-
+    read_tsv(
+        here("hg004g1.lrbasic.bwa.sortbx.molecule.tsv"),
+		col_types = cols(
+		  Rname = col_character(),
+		  Start = col_integer(),
+		  End = col_integer(),
+		  BX = col_character(),
+		  Reads = col_integer(),
+		  MI = col_integer()
+		)
+	) %>%
+	mutate(
+		Pairs = as.integer(round(Reads / 2)),
+		Observed_size = End - Start) %>%
+	filter(Reads >= 4, Observed_size >= 500) %>%
+	mutate(Size = round(Observed_size * (1 + 2 / (Pairs - 1)) - 1))
+
+molecules <- molecules_orig %>%
+	filter(Reads >= 6)
+```
+
+### Input DNA
+```{r total-dna, echo=F}
+ggplot(molecules) +
+	aes(x = Size, weight = Size) +
+	geom_histogram(binwidth = 5e3, boundary = 0) +
+	scale_x_continuous(name = "Molecule size",
+		labels = unit_format(unit = "kbp", scale = 1e-3)) +
+	scale_y_continuous(name = "Total DNA mass",
+		labels = unit_format(unit = "Mbp", scale = 1e-6)) +
+	coord_cartesian(x = c(0, 250e3)) +
+	theme_bw(18)
+```
+
+### Molecule size distribution
+```{r molecule-size, echo=F}
+Nx <- function(x, p) {
+	sorted <- rev(sort(x))
+	sorted[cumsum(sorted) >= sum(sorted) * p][1]
+}
+
+N50 <- function(x) Nx(x, p = 0.5)
+
+molecule_stats <- function(x)
+	summarize(x,
+		Molecules = n(),
+		Barcodes = n_distinct(BX),
+		N50_LPM = N50(Reads / 2),
+		Weighted_mean = weighted.mean(Size, Size),
+		N75 = Nx(Size, 0.75),
+		N50 = Nx(Size, 0.50),
+		N25 = Nx(Size, 0.25),
+		Max = max(Size))
+
+unfiltered_stats <- molecule_stats(molecules_orig)
+filtered_stats <- molecule_stats(molecules)
+
+kable(rbind(
+	unfiltered_stats %>% add_column(Filter = "Reads ≥ 4", .before = 1),
+	filtered_stats %>% add_column(Filter = "Reads ≥ 6", .before = 1)))
+```
+
+Long Ranger
+===================================== 
 
 ```{r prelims}
 summary_csv <- here("hg004g1_lrwgsvc/outs/summary.csv")
@@ -34,9 +108,6 @@ All numbers were formatted so that
 -Large values in bases or base pairs were converted to kb or kbp
 Plots don't make sense for these values; can think of value boxes 
 or guages for important percentage values-->
-
-Long Ranger
-===================================== 
 
 Sidebar {.sidebar}
 -------------------------------------
