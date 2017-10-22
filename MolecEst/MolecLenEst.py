@@ -15,6 +15,7 @@ Version 0.0.1
 
 from optparse import OptionParser
 import pysam
+#import numpy
 
 class Molecule:
     def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
@@ -37,7 +38,7 @@ class Molecule:
         
 class MolecIdentifier:
     
-    def setBam(self,bam):
+    def setBAM(self,bam):
         self._bam = bam
     
     def setDist(self, dist):
@@ -48,6 +49,12 @@ class MolecIdentifier:
     
     def setMAPQ(self, mapq):
         self._mapq = mapq
+    
+    def setAS(self, alns):
+        self._as = alns
+    
+    def setNM(self, nm):
+        self._nm = nm
     
     def setNewBam(self, filename):
         self._newBamFilename = filename
@@ -69,8 +76,10 @@ class MolecIdentifier:
         Constructor, identifies molecules based on inter-arrival time threshold
         """
         self._min = 4
-        self._maxDist = 50000
+        self._maxDist = 60000
         self._mapq = 1
+        self._as = 0.8
+        self._nm = 5
         self._newBamFilename = ""
         self._tsvFilename = ""
         
@@ -101,8 +110,13 @@ class MolecIdentifier:
         newMolecID = 0
         for read in samfile:
             barcode = ""
-            if read.is_unmapped:
+            if read.is_unmapped or \
+            read.is_supplementary or \
+            read.mapping_quality >= self._mapq or \
+            read.get_tag("AS") >= self._as*len(read.query_sequence) or \
+            read.get_tag("NM") < self._nm:
                 continue
+            
             # extract barcode
             barcodeList = [bc for bc in read.tags if "BX" in bc]
             if len(barcodeList) != 0:
@@ -125,11 +139,6 @@ class MolecIdentifier:
                 count = 0
                 totalBases = 0
                 totalAS = 0
-                
-                #mapq values for calculating median
-                mapqs = []
-                #alignment score values for calculating median
-                aScores = []
                 
                 for curRead in curReads:
 #                     print(str(curRead.is_reverse) + " " + curRead.reference_name + " " + str(curRead.pos))                    
@@ -203,7 +212,7 @@ class MolecIdentifier:
                     newMolecID += 1
                 curReads = []
             curReads.append(read)
-            prevBarcode = barcode;
+            prevBarcode = barcode
             prevChr = read.reference_id
         
         #clean up
@@ -220,19 +229,23 @@ if __name__ == '__main__':
     parser.add_option("-b", "--bam", dest="bam",
                   help="Reference to genome BAM file (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
-                  help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
+                  help="Minimum distance when considering interarrival times [60000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
                   help="file name of tsv file (optional)", metavar="OUTPUT")
-    parser.add_option("-n", "--new_bam", dest="newBam",
+    parser.add_option("-w", "--new_bam", dest="newBam",
                   help="new bam file (optional)", metavar="NEWBAM")
     parser.add_option("-m", "--min", dest="min",
-                  help="minimum number of reads in alignment to consider [4]", metavar="MIN")
+                  help="minimum number of reads in alignment to consider (dupes are not considered) [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
                   help="minimum mapq threshold to consider [1]", metavar="MAPQ")
+    parser.add_option("-a", "--alns", dest="alns",
+                  help="alns of alignment score [0.8]", metavar="AS")
+    parser.add_option("-n", "--nm", dest="nm",
+                  help="no match threshold to consider [5]", metavar="NM")
     
     (options, args) = parser.parse_args()  
   
-    molecID = MolecIdentifier(options.bam)
+    molecID = MolecIdentifier()
     if options.bam:
         molecID.setBAM(options.bam)
     if options.dist:
@@ -241,6 +254,10 @@ if __name__ == '__main__':
         molecID.setMin(options.min)
     if options.mapq:
         molecID.setMAPQ(options.mapq)
+    if options.alns:
+        molecID.setAS(options.alns)
+    if options.nm:
+        molecID.setNM(options.nm)
     if options.newBam:
         molecID.setNewBam(options.newBam)
     if options.output:

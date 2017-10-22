@@ -1,3 +1,6 @@
+# Title to use for the report.
+title: ChromeQC
+
 # Default output filenames
 output_fn_name: multiqc_report_chromeqc.html
 data_dir_name: multiqc_data_chromeqc
@@ -25,12 +28,37 @@ plots_flat_numseries: 100        # If neither of the above, use flat if > this n
 num_datasets_plot_limit: 50      # If interactive, don't plot on load if > this number of datasets
 max_table_rows: 500              # Swap tables for a beeswarm plot above this
 
+custom_logo: null         # '/path/to/logo.png'
+custom_logo_url: https://github.com/hackseq/2017_project_6     # 'https://www.example.com'
+custom_logo_title: HERE   # 'Our Institute Name'
+subtitle: Summarize sequencing library quality of 10x Genomics Chromium linked reads            # Grey text below title
+intro_text: False          # Set to False to remove, or your own text
+
 custom_data:
-    chromeqc_molecule_size:
+    order:
+        - molecule_size
+        - unmatched_barcodes
+        - whitelist_barcodes
+    molecule_size:
         file_format: 'csv'
         section_name: 'Molecule size'
         description: 'Density plots of Chromium molecule size'
         plot_type: 'linegraph'
+    unmatched_barcodes:
+        file_format: 'tsv'
+        section_name: 'Unmatched barcode distribution'
+        description: 'Number of reads in each barcode that is not on the white list'
+        plot_type: 'linegraph'
+    whitelist_barcodes:
+        file_format: 'tsv'
+        section_name: 'White list barcode distribution'
+        description: 'Number of reads in each barcode that is on the white list'
+        plot_type: 'linegraph'
+
 sp:
-    chromeqc_molecule_size:
+    molecule_size:
         fn: '*chromqc_molecule_size.csv'
+    unmatched_barcodes:
+        fn: '*unmatched_barcodes_population_counts.tsv'
+    whitelist_barcodes:
+        fn: '*whitelist_barcodes_population_counts.tsv'

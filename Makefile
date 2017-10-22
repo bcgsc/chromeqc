@@ -223,6 +223,12 @@ data/SHA256: \
 %.sortbx.molecule.tsv: %.sortbx.sam.gz
 	$(time) MolecEst/MolecLenEst.py -b $< -o $@
 
+# Report
+
+# Render an RMarkdown report to HTML.
+%.html: %.rmd
+	Rscript -e 'rmarkdown::render("$<", output_file="$(@F)")'
+
 # Paper
 
 # Download the Genome Research citation style language (CSL)

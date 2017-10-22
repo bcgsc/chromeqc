@@ -1,77 +1,49 @@
-
-
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Sat Oct 21 14:15:18 2017
 
 @author: nikka.keivanfar
 """
+chmod +x select_random_subset/adapter_16mers.py
 
 #to do: fasta as input
 
-P5 = 'AATGATACGGCGACCACCGA'
-P7 = 'CAAGCAGAAGACGGCATACGAGAT'
-read1 = 'GATCTACACTCTTTCCCTACACGACGCTC'
-read2 = 'GTGACTGGAGTTCAGACGTGT'
+P5_Read1 = 'AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT'
+P7 = 'ATCTCGTATGCCGTCTTCTGCTTG'
+Read2 = 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC' ##keeping P7 and read 2 separate due to Nmer
+                                             ##(sample index) between them
 
-adapters = [P5, P7, read1, read2] #to do: streamline loops for all adapters combined
+#P5-read1
 
+P5_set = set()
+for i in range(len(P5_Read1) - k + 1):
+   P5_kmer = P5_Read1[i:i+k]
+   #P5_read1 16mers in a set
+   P5_set.add(P5_kmer)
 
-P5_kmers = {}
-P7_kmers = {}
-read1_kmers = {}
-read2_kmers = {}
-k = 16
+ 
+#P7
 
-#P5 16mers
-
-for i in range(len(P5) - k + 1):
-   kmer = P5[i:i+k]
-   if P5_kmers.has_key(kmer):
-      P5_kmers[kmer] += 1
-   else:
-      P5_kmers[kmer] = 1
-
-for kmer, count in P5_kmers.items():
-   print kmer + "\t" + str(count)
-   P5mers = set(kmer)
-   
-#P7 16mers
-   
+P7_set = set()
 for i in range(len(P7) - k + 1):
-   kmer = P7[i:i+k]
-   if P7_kmers.has_key(kmer):
-      P7_kmers[kmer] += 1
-   else:
-      P7_kmers[kmer] = 1
+   P7_kmer = P7[i:i+k]
+   #P7 16mers in a set
+   P7_set.add(P7_kmer)
 
-for kmer, count in P7_kmers.items():
-   print kmer + "\t" + str(count)
-   P7mers = set(kmer)
    
-#read1 16mers
+#read2
 
-for i in range(len(read1) - k + 1):
-   kmer = read1[i:i+k]
-   if read1_kmers.has_key(kmer):
-      read1_kmers[kmer] += 1
-   else:
-      read1_kmers[kmer] = 1
+Read2_set = set()
+for i in range(len(Read2) - k + 1):
+   Read2_kmer = Read2[i:i+k]
+   #Read2 16mers in a set
+   Read2_set.add(Read2_kmer)
 
-for kmer, count in read1_kmers.items():
-   print kmer + "\t" + str(count)
-   read1mers = set(kmer)
+
+#combine all of above 16mers into a single set
    
-#read2 16mers
-
-for i in range(len(read2) - k + 1):
-   kmer = read2[i:i+k]
-   if read2_kmers.has_key(kmer):
-      read2_kmers[kmer] += 1
-   else:
-      read2_kmers[kmer] = 1
-
-for kmer, count in read2_kmers.items():
-   print kmer + "\t" + str(count)
-   read2mers = set(kmer)
+from itertools import chain 
+  
+all_kmers = set(chain(P5_set, P7_set, Read2_set))
+print(all_kmers)
