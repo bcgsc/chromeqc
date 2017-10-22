@@ -293,13 +293,13 @@ Row {data-height=200}
 -------------------------------------
 
 ```{r}
-ubc$Barcode_count <- factor(ubc$Barcode_count)
-ggplot(ubc, aes(x=Barcode_count, y=Read_count)) + geom_bar(stat="identity")
+wbc$Barcode_count <- factor(wbc$Barcode_count)
+ggplot(wbc, aes(x=Barcode_count, y=Read_count)) + geom_bar(stat="identity") 
 ```
 
 ```{r}
-wbc$Barcode_count <- factor(wbc$Barcode_count)
-ggplot(wbc, aes(x=Barcode_count, y=Read_count)) + geom_bar(stat="identity") 
+ubc$Barcode_count <- factor(ubc$Barcode_count)
+ggplot(ubc, aes(x=Barcode_count, y=Read_count)) + geom_bar(stat="identity")
 ```
 
 Molecules
