@@ -5,13 +5,15 @@ import argparse
 import sys
 import subprocess
 import gzip
+import io # For io.StringIO
+import shlex
 # custom
 import process_fastq
 
 def bx(args):
     return None
 
-def preprocess(args):
+def subsample(args):
     in_fastq = args.fastq
     whitelist_path = args.whitelist
     output_dir = args.output_dir
@@ -20,7 +22,7 @@ def preprocess(args):
     seed = args.seed
     max_read_pairs = args.max_read_pairs
     verbose = args.verbose
-    out_fastq = output_dir + '/processed.fastq' 
+    out_fastq = args.output
 
     # Open whitelist
 
@@ -44,7 +46,6 @@ def preprocess(args):
         my_output = sys.stdout
     else:
         my_output = gzip.open(out_fastq+'.gz','wt+')
-
     # Open input FASTQ
     if in_fastq[0] == '-':
         my_process_fastq.process_fastq(file_in=sys.stdin, file_out=my_output)
@@ -57,10 +58,14 @@ def preprocess(args):
             my_process_fastq.process_fastq(file_in=input_file, file_out=my_output)
             input_file.close()
     my_output.close()
+    print("Subsampling done.")
     
 def mapping(args):
-    minimap_command = "minimap2 -t %d -a -sr %s %s > %s" % (args.threads, args.ref, args.fastq, args.sam)
-    subprocess.call(minimap_command)
+    minimap_command = "minimap2 -ax sr -t %s %s %s" % (args.threads, args.ref, args.fastq)
+    stdout = subprocess.check_output(shlex.split(minimap_command))
+    with open(args.sam,'w') as sam:
+        sam.write(stdout.decode("utf-8"))
+    print("Mapping done.")
 
 def filtering(args):
     print("filter")
@@ -93,24 +98,26 @@ def main(argv):
     chromeqc_subparser.add_argument('fastq', nargs='*', help='paths to raw FASTQ files')
     chromeqc_subparser.add_argument('output_dir', help='output directory')
     chromeqc_subparser.add_argument('-t','--threads', type=str, default=1, help='number of threads')
+    chromeqc_subparser.add_argument('-m','--memory', type=str, default=-1, help='max memory usage in gb')
     chromeqc_subparser.set_defaults(func=chromeqc_pipeline)
 
     ##########
     subsample_subparser = subparsers.add_parser('subsample', help='extracts barcode from read sequences')
-    subsample_subparser.add_argument('fastq', nargs='*', help='paths raw chromium FASTQ files')
+    subsample_subparser.add_argument('fastq', help='paths raw chromium FASTQ files')
     subsample_subparser.add_argument('whitelist', type=str, help='path to whitelisted barcodes')
     subsample_subparser.add_argument('output_dir', type=str, help='output dir') 
+    subsample_subparser.add_argument('output', type=str, help='output file')
     subsample_subparser.add_argument('-k', '--subsample_size', default=4000, type=int, help='preprocess size')
     subsample_subparser.add_argument('-s', '--seed', default=1334, type=int, help='seed for random sampling')
-    subsample_subparser.add_argument('-m', '--max_read_pairs', default=-1, type=int, help='max number of read pairs')
+    subsample_subparser.add_argument('-p', '--max_read_pairs', default=-1, type=int, help='max number of read pairs')
     subsample_subparser.add_argument('-v', '--verbose', default=False, type=bool, help='verbose output')
-    subsample_subparser.set_defaults(func=preprocess)
+    subsample_subparser.set_defaults(func=subsample)
 
     ########## 
     map_subparser = subparsers.add_parser('map', help='map reads onto reference genome')
-    map_subparser.add_argument('fastq', nargs='*', help='preprocessed chromium FASTQ files')
+    map_subparser.add_argument('fastq', help='preprocessed chromium FASTQ files')
     map_subparser.add_argument('ref', type=str, help='reference genome')
-    map_subparser.add_argument('output_dir', type=str, help='output dir')
+    map_subparser.add_argument('sam', type=str, help='output SAM file path')
     map_subparser.add_argument('-t','--threads', type=str, default=1, help='number of threads')
     map_subparser.set_defaults(func=mapping)
 
@@ -151,11 +158,14 @@ def main(argv):
     multiqc_subparser.set_defaults(func=multiqc)
 
     args = parser.parse_args()
+    args.func(args)
+    '''
     try:
         args.func(args)
     except:
         parser.print_help()
         sys.exit(0)
+    '''
 
 if __name__ == "__main__":
     main(sys.argv)
