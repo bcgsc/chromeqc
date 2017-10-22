@@ -1,6 +1,7 @@
 ---
-title: 'Linked-Reads QC: Summarize sequencing library quality of 10x Genomics Chromium linked reads'
+title: 'ChromeQC: Summarize sequencing library quality of 10x Genomics Chromium linked reads'
 author: [Shaun D Jackman, Justin Chu, Emre Erhan, Nikka Keivanfar, Sean La, Swapna Menon, Tatyana Mozgacheva, Baraa Orabi, Chen Yang, Hamid Younesy]
+affiliation: [University of British Columbia; Simon Fraser University] 
 bibliography: paper.bib
 csl: paper.csl
 rangeDelim: "&ndash;"
@@ -20,14 +21,20 @@ For that, 10x Genomics provide their own analysis tool, Loupe. Loupe provides QC
 # Methods
 
 ## Random Sampling of Barcodes
-Raw fastq file is fed to ChromeQC. The user chooses a random seed that will deterministically sample without replacement 4000 barcodes out of 10x Chromium whitelist of barcodes. The fastq file is then read, the barcodes (first 16 nucleotides of the first read) are extracted and those reads with the sampled whitelisted barcodes are outputted to the next stage. In the same 
+Raw FASTQ file is fed to ChromeQC. The user chooses a random seed that will deterministically sample without replacement 4000 barcodes out of 10x Chromium whitelist of barcodes. The FASTQ file is then read, the barcodes (first 16 nucleotides of the first read) are extracted and those reads with the sampled whitelisted barcodes are outputted to the next stage. In the same pass, we collect the distribution of sizes of the barcodes of the raw FASTQ file grouped by whether they are whitelisted or not. We report these statistics as two histograms in our report.
 ## Read Alignment
 
-## Grouping Reads To Molecules
+The reads subsample that we collected is piped to minimap2 and [] human reference genome. The mappings are then sorted by barcode using SAMtools.
 
-## Computing Molecule Statistisc
+## Inferring Molecules Spans
+
+
+
+## Computing Molecule Statistics
 
 ## Report Generation
+
+The final report of a single sample is generated using Rmarkdown.
 
 ## Multiple Report Aggregation
 # Results
