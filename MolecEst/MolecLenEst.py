@@ -112,9 +112,9 @@ class MolecIdentifier:
             barcode = ""
             if read.is_unmapped or \
             read.is_supplementary or \
-            read.mapping_quality >= self._mapq or \
-            read.get_tag("AS") >= self._as*len(read.query_sequence) or \
-            read.get_tag("NM") < self._nm:
+            read.mapping_quality < self._mapq or \
+            read.get_tag("AS") < self._as*len(read.query_sequence) or \
+            read.get_tag("NM") >= self._nm:
                 continue
             
             # extract barcode
