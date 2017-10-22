@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 # Author: Emre Erhan
 # Take a sam file in stdin with the barcode in the read name and the barcode length as an input parameter,
@@ -15,7 +16,7 @@ def format_sam(barcode_length):
         read_name = parsed_line[0]
         barcode = read_name[:barcode_length]
         new_name = read_name[barcode_length + 1:]
-        new_line = new_name + "\t".join(parsed_line[1:]) + "\t BX:{}".format(barcode)
+        new_line = new_name + "\t".join(parsed_line[1:]) + "\t BX:Z:{}".format(barcode)
         print(new_line)
 
 
