@@ -10,9 +10,9 @@ chmod +x select_random_subset/adapter_16mers.py
 #to do: fasta as input
 
 P5_Read1 = 'AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT'
-P7 = 'CAAGCAGAAGACGGCATACGAGAT'
-Read2 = 'GTGACTGGAGTTCAGACGTGT' ##P7 and read 2 not concatenated due to Nmer between (sample index)
-
+P7 = 'ATCTCGTATGCCGTCTTCTGCTTG'
+Read2 = 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC' ##keeping P7 and read 2 separate due to Nmer
+                                             ##(sample index) between them
 
 #P5-read1
 
