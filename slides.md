@@ -35,8 +35,9 @@ MultiQC Example
 ![plot of chunk unnamed-chunk-2](slides-figure/mutltiQC.png) 
 
 ========================================================
-# ChromeQC
+# ChromeQC Pipeline
 ![plot of chunk unnamed-chunk-2](slides-figure/chromeQC.png) 
+
 
 Pipeline: Subsample
 ========================================================
@@ -44,6 +45,23 @@ Pipeline: Subsample
 - Randomly select 4000 out of ~4M whitelisted barcodes
 - Extract reads with selected barcodes for downstream analysis
 - Report histrograms of unmatched and of whitelisted barcodes 
+
+
+
+Pipeline: Read Alignment
+========================================================
+- minimap
+- GRCh38 reference genome
+- Group by barcode, sort by position 
+
+Pipeline: Molecule Size Extraction
+========================================================
+Heuristic:
+- 
+- 
+Any two reads < 60Kbp away are in the same molecule
+- Any reads with same position and orientation are discarded except for one
+- 
 
 Slide With Plot
 ========================================================
