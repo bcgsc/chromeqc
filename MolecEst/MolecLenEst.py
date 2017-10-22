@@ -82,6 +82,7 @@ class MolecIdentifier:
         self._nm = 5
         self._newBamFilename = ""
         self._tsvFilename = ""
+        self._bam = ""
         
     def run(self):
         if self._bam:
