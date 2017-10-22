@@ -38,7 +38,7 @@ class Molecule:
         
 class MolecIdentifier:
     
-    def setBam(self,bam):
+    def setBAM(self,bam):
         self._bam = bam
     
     def setDist(self, dist):
