@@ -15,6 +15,7 @@ Version 0.0.1
 
 from optparse import OptionParser
 import pysam
+import numpy
 
 class Molecule:
     def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
@@ -85,7 +86,7 @@ class MolecIdentifier:
         else:
             self._outfilebam = None
         
-        header = "Rname\tStart\tEnd\tBX\tReads\tMI"
+        header = "Rname\tStart\tEnd\tBX\tReads\tMI\tMeanDist\tDistSTDEV"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
             self._newMolecFH.write(header + "\n")
@@ -232,7 +233,7 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()  
   
-    molecID = MolecIdentifier(options.bam)
+    molecID = MolecIdentifier()
     if options.bam:
         molecID.setBAM(options.bam)
     if options.dist:
