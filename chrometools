@@ -88,7 +88,9 @@ def report(args):
     print("report")
 
 def multiqc(args):
-    print("multiqc")
+    os.chdir(args.directory)
+    subprocess.call(shlex.split('multiqc -f -c multiqc_config_chromeqc.yaml .'))
+    print("Multiqc report compilation complete.")
 
 def chromeqc_pipeline(args):
     # remember to time each part of the pipeline
@@ -158,8 +160,7 @@ def main(argv):
 
     ##########
     multiqc_subparser = subparsers.add_parser('multiqc', help='aggregate multiple reports')
-    multiqc_subparser.add_argument('input', help='input file')
-    multiqc_subparser.add_argument('output_dir', help='output directory')
+    multiqc_subparser.add_argument('directory', help='directory containing report files')
     multiqc_subparser.set_defaults(func=multiqc)
 
     args = parser.parse_args()
