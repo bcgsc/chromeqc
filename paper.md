@@ -18,10 +18,9 @@ Quality control (QC) for sequencing data is done to assess whether the sequencin
 For that, 10x Genomics provide their own analysis tool, Loupe. Loupe provides QC summary of the sequencing data alongside phasing information, SNP calling, and structural variants discovered. When analyzing [some number]x coverage fastq file, Loupe takes about [some time number] at memory usage peak of [some memory number]. The aim of ChromeQC analysis of Chromium sequencing data that is focused on QC of sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode at substantially less time and memory costs than Loupe's performance. On top of that, ChromeQC is compatible with MultiQC [@Ewels_2016], a tool that combines relevant QC reports from multiple samples into a single integrated report.
 
 # Methods
-## Extract Barcodes
 
 ## Random Sampling of Barcodes
-Raw fastq file is fed to
+Raw fastq file is fed to ChromeQC. The user chooses a random seed that will deterministically sample without replacement 4000 barcodes out of 10x Chromium whitelist of barcodes. The fastq file is then read, the barcodes (first 16 nucleotides of the first read) are extracted and those reads with the sampled whitelisted barcodes are outputted to the next stage. In the same 
 ## Read Alignment
 
 ## Grouping Reads To Molecules
