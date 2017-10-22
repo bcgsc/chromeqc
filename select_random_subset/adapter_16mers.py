@@ -19,7 +19,6 @@ adapters = [P5_read1, P7, read2] #to do: streamline loops for all adapters combi
 
 P5_kmers = {}
 P7_kmers = {}
-read1_kmers = {}
 read2_kmers = {}
 k = 16
 
