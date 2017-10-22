@@ -227,7 +227,7 @@ data/SHA256: \
 
 # Render an RMarkdown report to HTML.
 %.html: %.rmd
-	Rscript -e 'rmarkdown::render("$<", "html_document", "$(@F)")'
+	Rscript -e 'rmarkdown::render("$<", output_file="$(@F)")'
 
 # Paper
 
