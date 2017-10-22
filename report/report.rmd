@@ -1,33 +1,30 @@
 ---
-title: "ChromeQC beta for 10X Genomics Linked Reads"
-author: "Swapna Menon,Project 6-HackSeq 2017"
-date: "10/22/2017"
+title: "ChromeQC: Library Quality of Linked Reads"
 output:
   flexdashboard::flex_dashboard:
-  theme: bootstrap
+    theme: bootstrap
 ---
 
 ```{r setup, include=FALSE}
+library(dplyr)
+library(flexdashboard)
+library(ggplot2)
+library(here)
+library(readr)
+
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r prelims}
-#1. Read in data
+summary_csv <- here("hg004g1_lrwgsvc/outs/summary.csv")
+g2 <- read.csv(summary_csv)
 
-filename <- "summary2g.csv"
-g2 <- read.csv(filename)
-
-library(here)
-#filename <- "hg002g1_lrwgsvc/outs/summary.csv"
-#g2 <- read.csv(here(filename))
-
-#2. Function to format numbers
+# Format a number
 digi <- function(num){
   format(num, digits = 2, big.mark=",")
 }
-#3. loading library to make flexdashboard document
-library(flexdashboard)
 ```
+
 <!--The goal was to display the quants and statistics from Long Ranger Summary file in a user-friendly manner.
 Metrics were classified into relevant category pertaining to molecule or alignment.
 All numbers were formatted so that
@@ -38,13 +35,13 @@ All numbers were formatted so that
 Plots don't make sense for these values; can think of value boxes 
 or guages for important percentage values-->
 
-SUMMARY
+Long Ranger
 ===================================== 
 
 Sidebar {.sidebar}
 -------------------------------------
 
-File: `r filename` 
+File: `r summary_csv` 
 
 ***
 
@@ -114,7 +111,7 @@ Column {data-width=7000}
 
 *Aligned bases mapped to target regions* \ \t \ \t\ \t \ \t `r digi(g2$on_target_bases*100)` % 
 
-BASE QUALITY OF READS
+Sequencing Quality
 ===================================== 
 
 Column
@@ -172,13 +169,11 @@ gauge(digi(g2$bc_q30_bases_fract*100), min = 0, max = 100, symbol = '%')
 ```
 
 ```{r read alignmentstats}
-#Read in tsv file (from minimap2 aln SAM)
-filename2 <- "hg004g1.lrbasic.bwa.sortbx.molecule.tsv"
-molecules_orig <- read.table(filename2, sep="\t", header = TRUE)
-#molecules_orig <- here(read.table(filename2, sep="\t", header = TRUE))
+molecule_tsv <- here("hg004g1.lrbasic.bwa.sortbx.molecule.tsv")
+molecules_orig <- read.table(molecule_tsv, sep="\t", header = TRUE)
 ```
 
-BARCODE WHITELIST STATISTICS
+Barcodes
 ===================================== 
 
 Sidebar {.sidebar}
@@ -195,7 +190,6 @@ Alignment Program Name
 
 ```{r funchist}
 #Function for plotting with ggplot
-library(ggplot2)
 makehist <- function(obj, varname, weight, binwidth, fill, color, ti, xname, yname, int) {
 ggplot(obj,aes(x=varname, weight=weight)) + geom_histogram(binwidth = binwidth, fill=fill, color=color) + ggtitle(ti) +
 scale_x_continuous(name=xname) + scale_y_continuous(name =yname) + geom_vline(xintercept = int, colour="red", linetype = "dashed") + theme_minimal()
@@ -205,8 +199,8 @@ scale_x_continuous(name=xname) + scale_y_continuous(name =yname) + geom_vline(xi
 ### Read Distribution of Unmatched Barcodes
 
 ```{r unmatched}
-library(dplyr)
-ubc <- read.table("unmatched_barcodes_population_counts.tsv", sep="\t", header=TRUE)
+ubc_tsv <- here("select_random_subset/unmatched_barcodes_population_counts.tsv")
+ubc <- read_tsv(ubc_tsv)
 colnames(ubc) <- c("Read_count", "Barcode_count")
 tableubc <- ubc %>% group_by(Barcode_count) %>% summarize(sum(Read_count))
 colnames(tableubc) <- c("Barcode_count", "Read_count")
@@ -216,7 +210,8 @@ knitr::kable(tableubc)
 ### Read Distribution of White-listed Barcodes
 
 ```{r whitelist}
-wbc <- read.table("whitelist_barcodes_population_counts.tsv", sep="\t", header=TRUE)
+wbc_tsv <- here("select_random_subset/whitelist_barcodes_population_counts.tsv")
+wbc <- read_tsv(wbc_tsv)
 colnames(wbc) <- c("Read_count", "Barcode_count")
 tablewbc <- wbc %>% group_by(Barcode_count) %>% summarize(sum(Read_count))
 colnames(tablewbc) <- c("Barcode_count", "Read_count")
@@ -236,7 +231,7 @@ wbc$Barcode_count <- factor(wbc$Barcode_count)
 ggplot(wbc, aes(x=Barcode_count, y=Read_count)) + geom_bar(stat="identity") 
 ```
 
-MOLECULE & BARCODE STATISTICS
+Molecules
 ===================================== 
 
 Sidebar {.sidebar}
@@ -301,4 +296,3 @@ Function for histogram bin size?
 Proofing for technical accuracy
 Map the metric terms used on page 1 to Long Ranger summary metrics-may be provide a link to https://support.10xgenomics.com/genome-exome/software/pipelines/latest/output/metrics for further explanation
 or mouse over?? -->
-
