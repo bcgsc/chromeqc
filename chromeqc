@@ -1,41 +1,161 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# standard
 import argparse
 import sys
 import subprocess
+import gzip
+# custom
+import process_fastq
 
-def preprocess(argv):
+def bx(args):
+    return None
+
+def preprocess(args):
+    in_fastq = args.fastq
+    whitelist_path = args.whitelist
+    output_dir = args.output_dir
+    preprocess = args.subsample_size
+    stats = output_dir
+    seed = args.seed
+    max_read_pairs = args.max_read_pairs
+    verbose = args.verbose
+    out_fastq = output_dir + '/processed.fastq' 
+
+    # Open whitelist
+
+    whitelist_file = ''
+
+    if whitelist_path[-2:] == 'gz':
+        whitelist_file = gzip.open(whitelist_path,'rb')
+    else:
+        whitelist_file = open(whitelist_path,'rb')
+
+    my_process_fastq = process_fastq.ProcessFastQBarCodes(
+                        barcode_whitelist_file=whitelist_file,
+                        stats_path=stats,
+                        subset_size=preprocess,
+                        random_seed=seed,
+                        max_read_pairs=max_read_pairs,
+                        verbose=verbose)
     
-    return None
+    # open output fastq
+    if out_fastq in {'stdout','-'}:
+        my_output = sys.stdout
+    else:
+        my_output = gzip.open(out_fastq+'.gz','wt+')
 
-def align(argv):
-    return None
+    # Open input FASTQ
+    if in_fastq[0] == '-':
+        my_process_fastq.process_fastq(file_in=sys.stdin, file_out=my_output)
+    else:
+        for input_path in in_fastq:
+            if input_path[-2:] == 'gz':
+                input_file = gzip.open(input_path, 'rb')
+            else:
+                input_file = open(input_path, 'rb')
+            my_process_fastq.process_fastq(file_in=input_file, file_out=my_output)
+            input_file.close()
+    my_output.close()
+    
+def mapping(args):
+    minimap_command = "minimap2 -t %d -a -sr %s %s > %s" % (args.threads, args.ref, args.fastq, args.sam)
+    subprocess.call(minimap_command)
 
-def stats(argv):
-    return None
+def filtering(args):
+    print("filter")
+
+def sorting(args):
+    print("sorting")
+
+def molecule(args):
+    print("molecule")
+
+def stats(args):
+    print("stats")
+
+def report(args):
+    print("report")
+
+def multiqc(args):
+    print("multiqc")
+
+def chromeqc_pipeline(args):
+    # remember to time each part of the pipeline
+    print("all pipeline")
 
 def main(argv):
     parser = argparse.ArgumentParser()
-
     subparsers = parser.add_subparsers()
 
-    preprocess_subparser = subparsers.add_parser('preprocess', help='preprocess help')
-    preprocess_subparser.add_argument('fastq', nargs='*', help='paths raw chromium FASTQ files')
-    preprocess_subparser.add_argument('whitelist', type=str, help='path to whitelisted barcodes')
-    preprocess_subparser.add_argument('output_dir', type=str, help='output dir') 
-    preprocess_subparser.set_defaults(func=preprocess)
-    
-    align_subparser = subparsers.add_parser('align', help='align help')
-    align_subparser.add_argument('fastq', nargs='*', help='preprocessed chromium FASTQ files')
-    align_subparser.add_argument('output_dir', type=str, help='output dir')
-    preprocess_subparser.set_defaults(func=align)
+    ##########
+    chromeqc_subparser = subparsers.add_parser('chromeqc', help='run the chromeqc pipeline')
+    chromeqc_subparser.add_argument('fastq', nargs='*', help='paths to raw FASTQ files')
+    chromeqc_subparser.add_argument('output_dir', help='output directory')
+    chromeqc_subparser.add_argument('-t','--threads', type=str, default=1, help='number of threads')
+    chromeqc_subparser.set_defaults(func=chromeqc_pipeline)
 
-    stats_subparser = subparsers.add_parser('stats', help='stat help')
-    stats_subparser.add_argument('alignment', nargs='*', help='path to chromium reads alignment')
+    ##########
+    subsample_subparser = subparsers.add_parser('subsample', help='extracts barcode from read sequences')
+    subsample_subparser.add_argument('fastq', nargs='*', help='paths raw chromium FASTQ files')
+    subsample_subparser.add_argument('whitelist', type=str, help='path to whitelisted barcodes')
+    subsample_subparser.add_argument('output_dir', type=str, help='output dir') 
+    subsample_subparser.add_argument('-k', '--subsample_size', default=4000, type=int, help='preprocess size')
+    subsample_subparser.add_argument('-s', '--seed', default=1334, type=int, help='seed for random sampling')
+    subsample_subparser.add_argument('-m', '--max_read_pairs', default=-1, type=int, help='max number of read pairs')
+    subsample_subparser.add_argument('-v', '--verbose', default=False, type=bool, help='verbose output')
+    subsample_subparser.set_defaults(func=preprocess)
+
+    ########## 
+    map_subparser = subparsers.add_parser('map', help='map reads onto reference genome')
+    map_subparser.add_argument('fastq', nargs='*', help='preprocessed chromium FASTQ files')
+    map_subparser.add_argument('ref', type=str, help='reference genome')
+    map_subparser.add_argument('output_dir', type=str, help='output dir')
+    map_subparser.add_argument('-t','--threads', type=str, default=1, help='number of threads')
+    map_subparser.set_defaults(func=mapping)
+
+    ##########
+    filter_subparser = subparsers.add_parser('filter', help='filter by alignment quality')
+    filter_subparser.add_argument('input', help='input file')
+    filter_subparser.add_argument('output_dir', help='output directory')
+    filter_subparser.set_defaults(func=filtering)
+
+    ########## 
+    sort_subparser = subparsers.add_parser('sort', help='group alignments by barcode, chromosome, position')
+    sort_subparser.add_argument('input', help='input file')
+    sort_subparser.add_argument('output_dir', help='output directory')
+    sort_subparser.set_defaults(func=sorting)
+
+    ##########
+    molecule_subparser = subparsers.add_parser('molecule', help='group reads into molecules')
+    molecule_subparser.add_argument('input', help='input file')
+    molecule_subparser.add_argument('output_dir', help='output directory')
+    molecule_subparser.set_defaults(func=molecule)
+
+    ##########
+    stats_subparser = subparsers.add_parser('stats', help='compute molecule and barcode statistics')
+    stats_subparser.add_argument('alignment', nargs='*', help='path to chromium reads mapment')
     stats_subparser.add_argument('output_dir', type=str, help='output dir')
     stats_subparser.set_defaults(func=stats)
 
-    args.func(args)
+    ##########
+    report_subparser = subparsers.add_parser('report', help='generate the report')
+    report_subparser.add_argument('input', help='input file')
+    report_subparser.add_argument('output_dir', help='output directory')
+    report_subparser.set_defaults(func=report)
+
+    ##########
+    multiqc_subparser = subparsers.add_parser('multiqc', help='aggregate multiple reports')
+    multiqc_subparser.add_argument('input', help='input file')
+    multiqc_subparser.add_argument('output_dir', help='output directory')
+    multiqc_subparser.set_defaults(func=multiqc)
+
+    args = parser.parse_args()
+    try:
+        args.func(args)
+    except:
+        parser.print_help()
+        sys.exit(0)
 
 if __name__ == "__main__":
     main(sys.argv)
