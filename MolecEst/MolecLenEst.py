@@ -237,11 +237,11 @@ if __name__ == '__main__':
     parser.add_option("-m", "--min", dest="min",
                   help="minimum number of reads in alignment to consider (dupes are not considered) [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
-                  help="minimum mapq threshold to consider [1]", metavar="MAPQ")
+                  help="Reads MAPQ greater or equal to this will be kept [1]", metavar="MAPQ")
     parser.add_option("-a", "--alns", dest="alns",
-                  help="alns of alignment score [0.8]", metavar="AS")
+                  help="Reads with alignment_score * read_length greater or equal to this will be kept [0.8]", metavar="AS")
     parser.add_option("-n", "--nm", dest="nm",
-                  help="no match threshold to consider [5]", metavar="NM")
+                  help="Reads that have NM tag lower than this will be kept [5]", metavar="NM")
     
     (options, args) = parser.parse_args()  
   
