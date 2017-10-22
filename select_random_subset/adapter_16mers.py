@@ -7,43 +7,35 @@ Created on Sat Oct 21 14:15:18 2017
 """
 chmod +x select_random_subset/adapter_16mers.py
 
-#to do: fasta as input
-
-P5_Read1 = 'AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT'
-P7 = 'ATCTCGTATGCCGTCTTCTGCTTG'
-Read2 = 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC' ##keeping P7 and read 2 separate due to Nmer
-                                             ##(sample index) between them
-
-#P5-read1
-
-P5_set = set()
-for i in range(len(P5_Read1) - k + 1):
-   P5_kmer = P5_Read1[i:i+k]
-   #P5_read1 16mers in a set
-   P5_set.add(P5_kmer)
-
- 
-#P7
-
-P7_set = set()
-for i in range(len(P7) - k + 1):
-   P7_kmer = P7[i:i+k]
-   #P7 16mers in a set
-   P7_set.add(P7_kmer)
-
-   
-#read2
-
-Read2_set = set()
-for i in range(len(Read2) - k + 1):
-   Read2_kmer = Read2[i:i+k]
-   #Read2 16mers in a set
-   Read2_set.add(Read2_kmer)
+###fasta as input
 
 
-#combine all of above 16mers into a single set
-   
-from itertools import chain 
-  
-all_kmers = set(chain(P5_set, P7_set, Read2_set))
-print(all_kmers)
+def fasta_reader(filename):
+    from Bio.SeqIO.FastaIO import FastaIterator
+    with open(filename) as handle:
+        for record in FastaIterator(handle):
+            yield record
+
+sequences = []
+adapters = []
+
+for entry in fasta_reader("adapters.fasta"): #change path here
+    heading = str(entry.id) #header of fasta
+    adapters.append(heading)
+    bp = str(entry.seq) #sequence of specific fasta entry
+    sequences.append(bp)
+
+adapters_dict = {} #make dictionary with fasta headers and corresponding seqs
+for i in range (len(adapters)):
+    adapters_dict[adapters[i]] = sequences[i]
+print adapters_dict
+
+k = 16
+                                            
+all_adapters = set()
+for values in adapters_dict.itervalues():
+    for i in range(len(values) - k + 1):
+        kmer = values[i:i+k]
+        all_adapters.add(kmer)
+print all_adapters
+print len(all_adapters)
