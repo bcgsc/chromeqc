@@ -1,6 +1,3 @@
-.center h1,
-.center h2,
-.center h3,
-.center p {
+h1, h2, h3, p {
   text-align: center;
 }
