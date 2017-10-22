@@ -70,7 +70,7 @@ class MolecIdentifier:
         Constructor, identifies molecules based on inter-arrival time threshold
         """
         self._min = 4
-        self._maxDist = 50000
+        self._maxDist = 60000
         self._mapq = 1
         self._newBamFilename = ""
         self._tsvFilename = ""
@@ -221,13 +221,13 @@ if __name__ == '__main__':
     parser.add_option("-b", "--bam", dest="bam",
                   help="Reference to genome BAM file (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
-                  help="Minimum distance when considering interarrival times [50000]", metavar="DIST")
+                  help="Minimum distance when considering interarrival times [60000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
                   help="file name of tsv file (optional)", metavar="OUTPUT")
     parser.add_option("-n", "--new_bam", dest="newBam",
                   help="new bam file (optional)", metavar="NEWBAM")
     parser.add_option("-m", "--min", dest="min",
-                  help="minimum number of reads in alignment to consider [4]", metavar="MIN")
+                  help="minimum number of reads in alignment to consider (dupes are not considered) [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
                   help="minimum mapq threshold to consider [1]", metavar="MAPQ")
     
