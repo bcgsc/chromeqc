@@ -8,13 +8,10 @@ Created on Sat Oct 21 14:15:18 2017
 chmod +x select_random_subset/adapter_16mers.py
 
 #to do: fasta as input
-#to do: scrap dictionaries, make sets
 
 P5_read1 = 'AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT'
 P7 = 'CAAGCAGAAGACGGCATACGAGAT'
 read2 = 'GTGACTGGAGTTCAGACGTGT' ##P7 and read 2 not concatenated due to Nmer between (sample index)
-
-adapters = [P5_read1, P7, read2] #to do: streamline loops for all adapters combined
 
 
 #P5-read1
