@@ -1,0 +1,275 @@
+---
+title: "ChromeQC beta for 10X Genomics Linked Reads"
+author: "Swapna Menon,Project 6-HackSeq 2017"
+date: "10/22/2017"
+output:
+  flexdashboard::flex_dashboard:
+  theme: bootstrap
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r prelims}
+#1. Read in data
+
+filename <- "summary2g.csv"
+g2 <- read.csv(filename)
+
+library(here)
+#filename <- "hg002g1_lrwgsvc/outs/summary.csv"
+#g2 <- read.csv(here(filename))
+
+#2. Function to format numbers
+digi <- function(num){
+  format(num, digits = 2, big.mark=",")
+}
+#3. loading library to make flexdashboard document
+library(flexdashboard)
+```
+<!--The goal was to display the quants and statistics from Long Ranger Summary file in a user-friendly manner.
+Metrics were classified into relevant category pertaining to molecule or alignment.
+All numbers were formatted so that
+-Large numbers had comma separators (digi function)
+-Decimals did not exceed two significant digits (digi function)
+-Fractions were converted to percentages
+-Large values in bases or base pairs were converted to kb or kbp
+Plots don't make sense for these values; can think of value boxes 
+or guages for important percentage values-->
+
+SUMMARY
+===================================== 
+
+Sidebar {.sidebar}
+-------------------------------------
+
+File: `r filename` 
+
+***
+
+Chromium `r g2$instrument_ids`
+
+***
+
+Long Ranger v. `r g2$longranger_version`
+
+Column {data-width=7000}
+-------------------------------------
+
+**GEMs**  
+
+*Number of GEMs* \ \t \ \t\ \t \ \t     `r digi(g2$gems_detected)`  
+
+
+*Mean DNA per GEM* \ \t \ \t\ \t \ \t  `r digi(g2$mean_dna_per_gem)` read pairs
+
+**INPUT DNA**
+
+*DNA per well* \ \t \ \t\ \t \ \t `r digi(g2$corrected_loaded_mass_ng)` ng  
+
+*Mean length +/- s.d.* \ \t \ \t\ \t \ \t  `r digi(g2$molecule_length_mean/1000)` kbp +/- `r digi(g2$molecule_length_stddev/1000)` kbp
+
+**BARCODE (BC)** 
+
+*Reads with valid BC* \ \t \ \t\ \t \ \t `r digi(g2$bc_on_whitelist*100)` %
+
+*Mean base quality score, BC bases*  \ \t \ \t\ \t \ \t`r digi(g2$bc_mean_qscore)`
+
+*N50, read-pairs per input DNA molecule* \ \t \ \t\ \t \ \t `r g2$n50_linked_reads_per_molecule`
+
+
+Column {data-width=7000}
+-------------------------------------
+
+**STRUCTURAL VARIANT CALLS**
+
+*Large SVs* \ \t \ \t\ \t \ \t `r digi(g2$large_sv_calls)`  
+
+*Deletions* \ \t \ \t\ \t \ \t `r digi(g2$short_deletion_calls)`
+
+**PHASING** 
+
+*Phased SNPs* \ \t \ \t\ \t \ \t `r digi(g2$snps_phased*100)` %
+
+*Genes phased in single phase block* \ \t \ \t\ \t \ \t `r digi(g2$genes_phased_lt_100kb*100)` %
+
+*Longest phase block* \ \t \ \t\ \t \ \t `r digi(g2$longest_phase_block/1000)` kb
+
+*N50 length, called phased blocks* \ \t \ \t\ \t \ \t `r digi(g2$n50_phase_block/1000)` kb
+
+**LINKED-READ ALIGNMENT** 
+
+*Long Ranger input reads* \ \t \ \t\ \t \ \t `r digi(g2$number_reads)`
+
+*Mapped reads* \ \t \ \t\ \t \ \t `r digi(g2$mapped_reads)`
+
+*Median insert size of aligned read pairs* \ \t \ \t\ \t \ \t `r digi(g2$median_insert_size)`
+
+*Mean read depth* \ \t \ \t\ \t \ \t `r digi(g2$mean_depth)`
+
+*Reads marked as PCR duplicates* \ \t \ \t\ \t \ \t `r digi(g2$pcr_duplication*100)` %  
+
+*Non-N bases with zero coverage* \ \t \ \t\ \t \ \t `r digi(g2$zero_coverage*100) ` %   
+
+*Aligned bases mapped to target regions* \ \t \ \t\ \t \ \t `r digi(g2$on_target_bases*100)` % 
+
+BASE QUALITY OF READS
+===================================== 
+
+Column
+-------------------------------------
+
+### Read 1 Q20
+
+```{r}
+gauge(digi(g2$r1_q20_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Read 1 Q30
+
+```{r}
+gauge(digi(g2$r1_q30_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Read 2 Q20
+
+```{r}
+gauge(digi(g2$r2_q20_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Read 2 Q30
+
+```{r}
+gauge(digi(g2$r2_q30_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+Column
+-------------------------------------
+
+### Sample Index Q20
+
+```{r}
+gauge(digi(g2$si_q20_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Sample Index Q30
+
+```{r}
+gauge(digi(g2$si_q30_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Barcode Q20
+
+```{r}
+gauge(digi(g2$bc_q20_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+### Barcode Q30
+
+```{r}
+gauge(digi(g2$bc_q30_bases_fract*100), min = 0, max = 100, symbol = '%')
+```
+
+```{r read alignmentstats}
+#Read in tsv file (from minimap2 aln SAM)
+filename2 <- "hg004g1.lrbasic.bwa.sortbx.molecule.tsv"
+molecules_orig <- read.table(filename2, sep="\t", header = TRUE)
+#molecules_orig <- here(read.table(filename2, sep="\t", header = TRUE))
+```
+
+BARCODE WHITELIST STATISTICS
+===================================== 
+
+Sidebar {.sidebar}
+-------------------------------------
+File: 
+
+***
+
+Chromium `r g2$instrument_ids`
+
+***
+
+Alignment Program Name
+
+
+MOLECULE & BARCODE STATISTICS
+===================================== 
+
+Sidebar {.sidebar}
+-------------------------------------
+File: 
+
+***
+
+Chromium `r g2$instrument_ids`
+
+***
+
+Alignment Program Name
+
+```{r plotting}
+library(dplyr)
+#introduce a column with molecule size
+molecules <- molecules_orig %>% mutate(Size = End - Start)
+
+#Function for plotting with ggplot
+library(ggplot2)
+makehist <- function(obj, varname, weight, binwidth, fill, color, ti, xname, yname, int) {
+ggplot(obj,aes(x=varname, weight=weight)) + geom_histogram(binwidth = binwidth, fill=fill, color=color) + ggtitle(ti) +
+scale_x_continuous(name=xname) + scale_y_continuous(name =yname) + geom_vline(xintercept = int, colour="red", linetype = "dashed") + theme_minimal()
+}
+
+# function for calculating bin size?
+#breaks <- pretty(range(x), n = nclass.FD(x), min.n = 1)
+#bwidth <- breaks[2]-breaks[1]
+```
+
+
+Calculations from SAM files
+
+Row {.tabset .tabset-fade, data-height=200}
+-------------------------------------
+
+### Size of the molecules 
+
+```{r}
+makehist(molecules, molecules$Size, molecules$Size, 5000,"orange", "green", "Size Distribution of Molecules", "Molecule size in bps", "Number of molecules", mean(molecules$Size))
+```
+
+### Number of reads per molecule
+
+```{r}
+makehist(molecules, molecules$Reads, 1, 2,"blue", "green", "Read counts per molecule", "Number of Molecules", "Number of Reads", mean(molecules$Reads))
+```
+
+Column {.tabset .tabset-fade, data-height=200}
+-------------------------------------
+
+#Number of reads per barcode 
+
+```{r}
+BClist <- molecules %>% group_by(BX) %>% summarize(counts=sum(Reads))
+#sum(BClist$counts)
+#sum(molecules$Reads)
+makehist(BClist, BClist$counts, 1, 5,"light blue", "green", "Number of reads per barcode", "Number of Barcodes", "Number of reads", mean(BClist$counts))
+```
+
+#Number of molecules per barcode 
+
+```{r}
+molBC <- molecules %>% group_by(BX) %>% summarize(molecules=length(MI))
+
+makehist(molBC, molBC$molecules, 1, 1,"brown", "green", "Number of molecules per barcode", "Number of Barcodes", "Number of molecules", mean(molBC$molecules))
+```
+
+
+
+
+<!--TO DO 
+Function for histogram bin size?
+Proofing for technical accuracy
+Map the metric terms used on page 1 to Long Ranger summary metrics-may be provide a link to https://support.10xgenomics.com/genome-exome/software/pipelines/latest/output/metrics for further explanation
+or mouse over?? -->
+
