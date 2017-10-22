@@ -86,7 +86,7 @@ class MolecIdentifier:
         else:
             self._outfilebam = None
         
-        header = "Rname\tStart\tEnd\tBX\tReads\tMI\tMeanDist\tDistSTDEV"
+        header = "Rname\tStart\tEnd\tBX\tReads\tMI"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
             self._newMolecFH.write(header + "\n")
