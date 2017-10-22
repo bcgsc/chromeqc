@@ -15,7 +15,7 @@ Version 0.0.1
 
 from optparse import OptionParser
 import pysam
-import numpy
+#import numpy
 
 class Molecule:
     def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
