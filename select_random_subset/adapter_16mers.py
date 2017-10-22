@@ -17,46 +17,37 @@ read2 = 'GTGACTGGAGTTCAGACGTGT' ##P7 and read 2 not concatenated due to Nmer bet
 adapters = [P5_read1, P7, read2] #to do: streamline loops for all adapters combined
 
 
-P5_kmers = {}
-P7_kmers = {}
-read2_kmers = {}
-k = 16
+#P5-read1
 
-#P5_Read1 16mers
+P5_set = set()
+for i in range(len(P5_Read1) - k + 1):
+   P5_kmer = P5_Read1[i:i+k]
+   #P5 16mers in a set
+   P5_set.add(P5_kmer)
 
-for i in range(len(P5_read1) - k + 1):
-   kmer = P5_read1[i:i+k]
-   if P5_kmers.has_key(kmer):
-      P5_kmers[kmer] += 1
-   else:
-      P5_kmers[kmer] = 1
+ 
+#P7
 
-for kmer, count in P5_kmers.items():
-   print(kmer + "\t" + str(count))
-   P5mers = set(kmer)
-   
-#P7 16mers
-   
+P7_set = set()
 for i in range(len(P7) - k + 1):
-   kmer = P7[i:i+k]
-   if P7_kmers.has_key(kmer):
-      P7_kmers[kmer] += 1
-   else:
-      P7_kmers[kmer] = 1
+   P7_kmer = P7[i:i+k]
+   #P7 16mers in a list
+   P7_set.add(P7_kmer)
 
-for kmer, count in P7_kmers.items():
-   print(kmer + "\t" + str(count))
-   P7mers = set(kmer)
    
-#read2 16mers
+#read2
 
-for i in range(len(read2) - k + 1):
-   kmer = read2[i:i+k]
-   if read2_kmers.has_key(kmer):
-      read2_kmers[kmer] += 1
-   else:
-      read2_kmers[kmer] = 1
+Read2_set = set()
+for i in range(len(Read2) - k + 1):
+   Read2_kmer = Read2[i:i+k]
+   #Read2 16mers in a list
+   Read2_set.add(Read2_kmer)
 
-for kmer, count in read2_kmers.items():
-   print(kmer + "\t" + str(count))
-   read2mers = set(kmer)
+
+#combine all of above 16mers into a single set
+   
+import itertools
+from itertools import chain 
+  
+all_kmers = set(chain(P5_set, P7_set, Read2_set))
+print(all_kmers)
