@@ -28,7 +28,7 @@ for entry in fasta_reader("adapters.fasta"): #change path here
 adapters_dict = {} #make dictionary with fasta headers and corresponding seqs
 for i in range (len(adapters)):
     adapters_dict[adapters[i]] = sequences[i]
-print adapters_dict
+print(adapters_dict)
 
 k = 16
                                             
@@ -37,5 +37,5 @@ for values in adapters_dict.itervalues():
     for i in range(len(values) - k + 1):
         kmer = values[i:i+k]
         all_adapters.add(kmer)
-print all_adapters
-print len(all_adapters)
+print(all_adapters)
+print(len(all_adapters))
