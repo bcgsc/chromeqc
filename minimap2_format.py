@@ -14,7 +14,7 @@ def format_sam(barcode_length):
         parsed_line = read.rstrip().split('\t')
         read_name = parsed_line[0]
         barcode = read_name[:barcode_length]
-        new_name = read_name[barcode_length:]
+        new_name = read_name[barcode_length + 1:]
         new_line = new_name + "\t".join(parsed_line[1:]) + "\t BX:{}".format(barcode)
         print(new_line)
 
