@@ -1,9 +1,10 @@
-# ChromeQC: Summarize sequencing library quality of 10x Genomics Chromium linked reads
+![ChromeQC logo](chromeqc-logo.png)
+
+# ChromeQC: Summarize library quality of 10x Genomics Chromium linked reads
 
 This tool provides a quick report on the quality of a 10x Genomics Chromium linked reads library. The report summarizes the sizes of the molecules, the number of reads per molecule, the number of molecules per barcode, and the amount of DNA per barcode. The idea is to provide a [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)-like tool in terms of speed but to contain information provided by the Summary page of the [Loupe software of 10x Genomics](https://support.10xgenomics.com/genome-exome/software/visualization/latest/what-is-loupe). ChromeQC is developed in Python 3, R, AWK, RMarkdown, and Flexdashboard, and uses BWA-MEM for read alignment.
 
 ## Usage
-
 
 ### Commandline arguments
 ```
