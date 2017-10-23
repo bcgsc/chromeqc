@@ -6,10 +6,14 @@
 *.log
 *.loupe
 *.molecule.tsv
+*.path
 *.pdf
 *.sam.gz
+*.time
 *_lrbasic/
+*_lrwgsvc/*.mri.tgz
 *_lrwgsvc/*/*
+*_lrwgsvc/_*
 .Rproj.user
 data/*
 !*_lrwgsvc/outs/summary.csv
