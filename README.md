@@ -31,4 +31,4 @@ The pipeline starts with raw fastq files of interleaved paired end reads provide
 
 The analysis and report will be created using R, the Tidyverse, RMarkdown, and Flexdashboard. Familiarity with some of these tools is useful, but not necessary to participate in this project. Non-technical participants are welcome to design the aesthetics of the report, prepare and deliver the presentation, and coordinate writing a brief paper about the tool.
 
-Team Lead : Shaun Jackman | sjackman@gmail.com | @sjackman | Grad Student | BC Cancer Agency Genome Sciences Centre
+Team Lead: [Shaun Jackman](http://sjackman.ca) | sjackman@gmail.com | @sjackman | Grad Student | BC Cancer Agency Genome Sciences Centre
