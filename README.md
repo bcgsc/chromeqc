@@ -23,16 +23,26 @@ This tool provides a quick report on the quality of a 10x Genomics Chromium link
 + [Sample ChromeQC report](https://hackseq.github.io/2017_project_6/report/)
 + [Sample MultiQC report](https://hackseq.github.io/2017_project_6/multiqc/)
 
-```
+```sh
 python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
 ```
 ## How ChromeQC Works
 The pipeline starts with raw fastq files of interleaved paired end reads provided by 10x Chromium platform.
 ### Extracting Barcodes and Sampling Reads
 
+## Dependencies
+
+```sh
+pip3 install -r requirements.txt
+brew bundle
+```
+
++ BWA or Minimap2
++ Pysam
++ Python 3
++ Samtools
+
 ## Prerequisites
-```
-```
 
 The analysis and report will be created using R, the Tidyverse, RMarkdown, and Flexdashboard. Familiarity with some of these tools is useful, but not necessary to participate in this project. Non-technical participants are welcome to design the aesthetics of the report, prepare and deliver the presentation, and coordinate writing a brief paper about the tool.
 
