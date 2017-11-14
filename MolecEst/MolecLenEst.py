@@ -228,7 +228,7 @@ if __name__ == '__main__':
     # specify parser options
     parser = OptionParser()
     parser.add_option("-b", "--bam", dest="bam",
-                  help="Reference to genome BAM file (optional)", metavar="BAM")
+                  help="Read to genome BAM file (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
                   help="Minimum distance when considering interarrival times [60000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
