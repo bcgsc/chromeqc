@@ -5,8 +5,7 @@ Last Updated Friday, Oct 20 2017
 
 Computes molecule size and stdev (for error bounds of molecule size)
 
-Columns: BX, MI, RefName, Start, End, Length_stdev, Reads
-Optional Columns: Mapq_median, AS_median, NM_median
+Columns: Rname Start End Size BX MI Reads Mapq_median AS_median NM_median
 
 Version 0.0.1
 
@@ -18,20 +17,19 @@ import pysam
 #import numpy
 
 class Molecule:
-    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, totalBases, alignScore, count):
+    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, count):
         self.rname = rname
         self.start = start
         self.end = end
         self.barcode = barcode
         self.newMolecID = newMolecID
         self.interArrivals = interArrivals
-        self.totalBases = totalBases
-        self.alignScore = alignScore
         self.count = count
 
     def asTSV(self):
         return self.rname + "\t" + str(self.start) + "\t" + str(self.end) \
-            + "\t" + self.barcode + "\t" + str(self.count) + "\t" + str(self.newMolecID)
+            + "\t" + str(self.end - self.start) + "\t" + self.barcode \
+            + "\t" + str(self.newMolecID) + "\t" + str(self.count)
 
     def getLength(self):
         return self.end-self.start
@@ -92,7 +90,7 @@ class MolecIdentifier:
         else:
             self._outfilebam = None
         
-        header = "Rname\tStart\tEnd\tBX\tReads\tMI"
+        header = "Rname\tStart\tEnd\tSize\tBX\tMI\tReads"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
             self._newMolecFH.write(header + "\n")
@@ -135,14 +133,11 @@ class MolecIdentifier:
                 rname = curReads[0].reference_name
                 interArrivals = []
                 count = 0
-                totalBases = 0
-                totalAS = 0
                 
                 for curRead in curReads:                    
                     value = curRead.pos
                     absDist = value - prevVal
-                    totalBases += curRead.rlen
-                    totalAS += curRead.get_tag("AS")
+#                     totalAS += curRead.get_tag("AS")
 
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
@@ -151,8 +146,7 @@ class MolecIdentifier:
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
                                          newMolecID, barcode, \
-                                         interArrivals, \
-                                         totalBases, totalAS, count)
+                                         interArrivals, count)
                         if prevRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -168,8 +162,6 @@ class MolecIdentifier:
                             self._outfilebam.write(curRead)
                         interArrivals = []
                         prevVal = value
-                        totalBases = 0;
-                        totalAS = 0;
                         count = 0
                         continue
                     else:
@@ -203,7 +195,7 @@ class MolecIdentifier:
                     prevVal = value
                     prevRead = curRead
                 end = prevRead.reference_end
-                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, totalBases, totalAS, count)
+                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, count)
                 if count >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
