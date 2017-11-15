@@ -42,28 +42,25 @@ class MolecIdentifier:
         self._bam = bam
     
     def setDist(self, dist):
-        self._maxDist = dist
+        self._maxDist = int(dist)
         
     def setMin(self, min):
-        self._min = min
+        self._min = int(min)
     
     def setMAPQ(self, mapq):
-        self._mapq = mapq
+        self._mapq = int(mapq)
     
-    def setAS(self, alns):
-        self._as = alns
+    def setASRatio(self, asRatio):
+        self._asRatio = float(alns)
     
     def setNM(self, nm):
-        self._nm = nm
+        self._nm = int(nm)
     
     def setNewBam(self, filename):
         self._newBamFilename = filename
     
     def setOutput(self, filename):
         self._tsvFilename = filename
-        
-    def setMAPQ(self, mapq):
-        self._mapq = mapq
         
     def printTSV(self, molec):
         if self._tsvFilename:
@@ -78,7 +75,7 @@ class MolecIdentifier:
         self._min = 4
         self._maxDist = 60000
         self._mapq = 1
-        self._as = 0.8
+        self._asRatio = 0.8
         self._nm = 5
         self._newBamFilename = ""
         self._tsvFilename = ""
@@ -114,7 +111,7 @@ class MolecIdentifier:
             if read.is_unmapped or \
             read.is_supplementary or \
             read.mapping_quality < self._mapq or \
-            read.get_tag("AS") < self._as*len(read.query_sequence) or \
+            read.get_tag("AS") < self._asRatio*len(read.query_sequence) or \
             read.get_tag("NM") >= self._nm:
                 continue
             
@@ -141,13 +138,12 @@ class MolecIdentifier:
                 totalBases = 0
                 totalAS = 0
                 
-                for curRead in curReads:
-#                     print(str(curRead.is_reverse) + " " + curRead.reference_name + " " + str(curRead.pos))                    
+                for curRead in curReads:                    
                     value = curRead.pos
                     absDist = value - prevVal
                     totalBases += curRead.rlen
                     totalAS += curRead.get_tag("AS")
-                    
+
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
                         end = prevRead.reference_end
@@ -227,20 +223,21 @@ if __name__ == '__main__':
     
     # specify parser options
     parser = OptionParser()
+    parser.set_description("Takes a bam file via stdin and outputs a bed like TSV file for each molecule. Read to genome bam file used must be sorted by BX tag and then by position.")
     parser.add_option("-b", "--bam", dest="bam",
-                  help="Read to genome BAM file (optional)", metavar="BAM")
+                  help="Read to genome BAM file file instead of stdin (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
-                  help="Minimum distance when considering interarrival times [60000]", metavar="DIST")
+                  help="Minimum distance between reads to be considered the same molecule [60000]", metavar="DIST")
     parser.add_option("-o", "--output", dest="output",
-                  help="file name of tsv file (optional)", metavar="OUTPUT")
+                  help="file name of tsv file instead of stdout (optional)", metavar="OUTPUT")
     parser.add_option("-w", "--new_bam", dest="newBam",
-                  help="new bam file (optional)", metavar="NEWBAM")
+                  help="New bam file with MI tags added (optional)", metavar="NEWBAM")
     parser.add_option("-m", "--min", dest="min",
                   help="minimum number of reads in alignment to consider (dupes are not considered) [4]", metavar="MIN")
     parser.add_option("-q", "--mapq", dest="mapq",
                   help="Reads MAPQ greater or equal to this will be kept [1]", metavar="MAPQ")
-    parser.add_option("-a", "--alns", dest="alns",
-                  help="Reads with alignment_score * read_length greater or equal to this will be kept [0.8]", metavar="AS")
+    parser.add_option("-a", "--asRatio", dest="asRatio",
+                  help="Reads with an AS/Read length ratio greater or equal to this will be kept [0.8]", metavar="AS")
     parser.add_option("-n", "--nm", dest="nm",
                   help="Reads that have NM tag lower than this will be kept [5]", metavar="NM")
     
@@ -255,8 +252,8 @@ if __name__ == '__main__':
         molecID.setMin(options.min)
     if options.mapq:
         molecID.setMAPQ(options.mapq)
-    if options.alns:
-        molecID.setAS(options.alns)
+    if options.asRatio:
+        molecID.setASRatio(options.asRatio)
     if options.nm:
         molecID.setNM(options.nm)
     if options.newBam:
