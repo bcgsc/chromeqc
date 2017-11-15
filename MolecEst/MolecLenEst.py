@@ -223,7 +223,7 @@ if __name__ == '__main__':
     
     # specify parser options
     parser = OptionParser()
-    parser.set_description("Takes a bam file via stdin and outputs a bed like TSV file for each molecule. Read to genome bam file used must be sorted by BX tag and then by position.")
+    parser.set_description("Takes a bam file via stdin and outputs molecules to a bed-like TSV file. Read to genome bam file used must be sorted by BX tag and then by position.")
     parser.add_option("-b", "--bam", dest="bam",
                   help="Read to genome BAM file file instead of stdin (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
