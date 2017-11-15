@@ -51,7 +51,7 @@ class MolecIdentifier:
         self._mapq = int(mapq)
     
     def setASRatio(self, asRatio):
-        self._asRatio = float(alns)
+        self._asRatio = float(asRatio)
     
     def setNM(self, nm):
         self._nm = int(nm)
