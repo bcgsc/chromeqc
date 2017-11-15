@@ -34,7 +34,7 @@ class Molecule:
         self.nmMedian = nmMedian
 
     def asTSV(self):
-        return self.rname + "\t" + str(self.start) + "\t" + str(self.end) \
+        return self.rname + "\t" + str(self.start+1) + "\t" + str(self.end+1) \
             + "\t" + str(self.end - self.start) + "\t" + self.barcode \
             + "\t" + str(self.newMolecID) + "\t" + str(self.count) \
             + "\t" + str(self.mapqMedian) + "\t" + str(self.asMedian) \
@@ -246,7 +246,7 @@ if __name__ == '__main__':
     
     # specify parser options
     parser = OptionParser()
-    parser.set_description("Takes a bam file via stdin and outputs molecules to a bed-like TSV file. Read to genome bam file used must be sorted by BX tag and then by position.")
+    parser.set_description("Takes a bam file via stdin and outputs molecules to a bed-like (1-based coordinates) TSV file. Read to genome bam file used must be sorted by BX tag and then by position.")
     parser.add_option("-b", "--bam", dest="bam",
                   help="Read to genome BAM file file instead of stdin (optional)", metavar="BAM")
     parser.add_option("-d", "--dist", dest="dist",
