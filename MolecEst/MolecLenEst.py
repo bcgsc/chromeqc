@@ -14,10 +14,14 @@ Version 0.0.1
 
 from optparse import OptionParser
 import pysam
-#import numpy
+import statistics
 
 class Molecule:
-    def __init__(self, rname, start, end, newMolecID, barcode, interArrivals, count):
+    def __init__(self, rname, start, end, \
+                 newMolecID, barcode, \
+                 interArrivals, count, \
+                 mapqMedian, asMedian, nmMedian):
+        
         self.rname = rname
         self.start = start
         self.end = end
@@ -25,11 +29,16 @@ class Molecule:
         self.newMolecID = newMolecID
         self.interArrivals = interArrivals
         self.count = count
+        self.mapqMedian = mapqMedian
+        self.asMedian = asMedian
+        self.nmMedian = nmMedian
 
     def asTSV(self):
         return self.rname + "\t" + str(self.start) + "\t" + str(self.end) \
             + "\t" + str(self.end - self.start) + "\t" + self.barcode \
-            + "\t" + str(self.newMolecID) + "\t" + str(self.count)
+            + "\t" + str(self.newMolecID) + "\t" + str(self.count) \
+            + "\t" + str(self.mapqMedian) + "\t" + str(self.asMedian) \
+            + "\t" + str(self.nmMedian)
 
     def getLength(self):
         return self.end-self.start
@@ -90,7 +99,7 @@ class MolecIdentifier:
         else:
             self._outfilebam = None
         
-        header = "Rname\tStart\tEnd\tSize\tBX\tMI\tReads"
+        header = "Rname\tStart\tEnd\tSize\tBX\tMI\tReads\tMapq_median\tAS_median\tNM_median"
         if self._tsvFilename:
             self._newMolecFH = open(self._tsvFilename, "w");
             self._newMolecFH.write(header + "\n")
@@ -132,12 +141,17 @@ class MolecIdentifier:
                 start = curReads[0].pos
                 rname = curReads[0].reference_name
                 interArrivals = []
+                mapQs = []
+                alSs = []
+                noMs = []
                 count = 0
                 
                 for curRead in curReads:                    
                     value = curRead.pos
                     absDist = value - prevVal
-#                     totalAS += curRead.get_tag("AS")
+                    mapQs.append(curRead.mapping_quality)
+                    alSs.append(curRead.get_tag("AS"))
+                    noMs.append(curRead.get_tag("NM"))
 
                     #check if molecules should be terminated
                     if absDist > self._maxDist and prevVal > 0:
@@ -145,8 +159,12 @@ class MolecIdentifier:
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
-                                         newMolecID, barcode, \
-                                         interArrivals, count)
+                                 newMolecID, barcode, \
+                                 interArrivals, count, \
+                                 statistics.median(mapQs), \
+                                 statistics.median(alSs), \
+                                 statistics.median(noMs))
+                        
                         if prevRead.is_reverse:
                             prevVal2 = value
                             prevVal1 = 0
@@ -161,6 +179,12 @@ class MolecIdentifier:
                             curRead.tags += [("MI", newMolecID)]
                             self._outfilebam.write(curRead)
                         interArrivals = []
+                        mapQs = []
+                        alSs = []
+                        noMs = []
+                        mapQs.append(curRead.mapping_quality)
+                        alSs.append(curRead.get_tag("AS"))
+                        noMs.append(curRead.get_tag("NM"))
                         prevVal = value
                         count = 0
                         continue
@@ -195,7 +219,14 @@ class MolecIdentifier:
                     prevVal = value
                     prevRead = curRead
                 end = prevRead.reference_end
-                molec = Molecule(rname, start, end, newMolecID, barcode, interArrivals, count)
+                molec = Molecule(rname, start, end, \
+                                 newMolecID, barcode, \
+                                 interArrivals, count, \
+                                 statistics.median(mapQs), \
+                                 statistics.median(alSs), \
+                                 statistics.median(noMs))
+                
+                
                 if count >= self._min:
                     self.printTSV(molec)
                     newMolecID += 1
