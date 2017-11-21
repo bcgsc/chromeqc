@@ -159,7 +159,7 @@ class MolecIdentifier:
                         
                         #find distance from nearest read
                         molec = Molecule(rname, start, end, \
-                                 newMolecID, barcode, \
+                                 newMolecID, prevBarcode, \
                                  interArrivals, count, \
                                  statistics.median(mapQs), \
                                  statistics.median(alSs), \
@@ -220,7 +220,7 @@ class MolecIdentifier:
                     prevRead = curRead
                 end = prevRead.reference_end
                 molec = Molecule(rname, start, end, \
-                                 newMolecID, barcode, \
+                                 newMolecID, prevBarcode, \
                                  interArrivals, count, \
                                  statistics.median(mapQs), \
                                  statistics.median(alSs), \
