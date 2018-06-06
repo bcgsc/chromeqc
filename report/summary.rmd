@@ -1,24 +1,29 @@
 ---
 title: "ChromeQC: Library quality of linked reads"
+params:
+  molecules_bed:
+    input: text
+    label: Input BED file of molecules with columns Rname, Start, End, BX, Number_reads
+    value: molecules.bed
 ---
 
 ```{r setup, echo=F, message=F, warning=F}
 library(dplyr)
 library(ggplot2)
-library(here)
 library(knitr)
 library(readr)
 library(scales)
 library(tibble)
 
-knit_print.data.frame <- function(x, ...)
-    kable(x) %>% paste(collapse = "\n") %>% asis_output
+knit_print.data.frame <- function(x, ...) kable(x) %>% paste(collapse = "\n") %>% asis_output
+molecules_bed_filename <- params$molecules_bed
+tibble(Molecules_BED = molecules_bed_filename)
 ```
 
 ```{r read-molecules, include=F}
-molecules_orig <-
-    read_tsv(
-        here("hg004g1.lrbasic.bwa.sortbx.molecule.tsv"),
+read_molecules_tsv <- function(filename)
+	read_tsv(
+		filename,
 		col_types = cols(
 		  Rname = col_character(),
 		  Start = col_integer(),
@@ -27,15 +32,29 @@ molecules_orig <-
 		  Reads = col_integer(),
 		  MI = col_integer()
 		)
-	) %>%
+	)
+
+read_molecules_bed <- function(filename)
+	read_tsv(
+		filename,
+		col_names = c("Rname", "Start", "End", "BX", "Reads"),
+		col_types = c("ciici"))
+
+observed_molecules <- read_molecules_bed(molecules_bed_filename) %>%
+	mutate(Size = End - Start) %>%
+	filter(Reads >= 4, Size >= 500)
+
+estimated_molecules <- observed_molecules %>%
 	mutate(
 		Pairs = as.integer(round(Reads / 2)),
-		Observed_size = End - Start) %>%
-	filter(Reads >= 4, Observed_size >= 500) %>%
-	mutate(Size = round(Observed_size * (1 + 2 / (Pairs - 1)) - 1))
+		Observed_size = End - Start,
+		Size = round(Observed_size * (1 + 2 / (Pairs - 1)) - 1))
 
-molecules <- molecules_orig %>%
-	filter(Reads >= 6)
+barcodes <- observed_molecules %>%
+	group_by(BX) %>%
+	summarize(Molecules = n(), Reads = sum(Reads), Size = sum(Size)) %>%
+	arrange(desc(Reads)) %>%
+	ungroup()
 ```
 
 # Molecule size distribution
@@ -58,22 +77,42 @@ molecule_stats <- function(x)
 		N25 = Nx(Size, 0.25),
 		Max = max(Size))
 
-unfiltered_stats <- molecule_stats(molecules_orig)
-filtered_stats <- molecule_stats(molecules)
+observed_stats <- molecule_stats(observed_molecules)
+estimated_stats <- molecule_stats(estimated_molecules)
 
 rbind(
-	unfiltered_stats %>% add_column(Filter = "Reads ≥ 4", .before = 1),
-	filtered_stats %>% add_column(Filter = "Reads ≥ 6", .before = 1))
+	observed_stats %>% add_column(Size = "Observed", .before = 1),
+	estimated_stats %>% add_column(Size = "Estimated", .before = 1))
 ```
 
 # Total DNA
 ```{r total-dna, echo=F}
-ggplot(molecules) +
+ggplot(observed_molecules) +
 	aes(x = Size, weight = Size) +
 	geom_histogram(binwidth = 5e3, boundary = 0) +
 	scale_x_continuous(name = "Molecule size",
 		labels = unit_format(unit = "kbp", scale = 1e-3)) +
 	scale_y_continuous(name = "Total DNA mass",
 		labels = unit_format(unit = "Mbp", scale = 1e-6)) +
-	coord_cartesian(x = c(0, 250e3))
+	coord_cartesian(x = c(0, 250e3)) +
+	ggtitle(paste0(
+		"N50_Size = ", observed_stats$N50,
+		", N50_LPM = ", observed_stats$N50_LPM,
+		", Molecules = ", observed_stats$Molecules,
+		", Barcodes = ", observed_stats$Barcodes))
+```
+
+# Molecules per barcode
+```{r molecules-per-barcode, echo=F}
+barcodes_summary <- barcodes %>%
+	summarize(
+		Molecules = sum(Molecules),
+		Barcodes = n(),
+		Molecules_per_barcode = Molecules / Barcodes)
+
+ggplot(barcodes) +
+	aes(x = Molecules) +
+	geom_histogram(binwidth = 1) +
+	labs(x = "Molecules per barcode", y = "Barcodes") +
+	ggtitle(paste("Mean molecules per barcode =", barcodes_summary$Molecules_per_barcode))
 ```
