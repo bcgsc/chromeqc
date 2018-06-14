@@ -60,7 +60,7 @@ barcodes <- observed_molecules %>%
 # Molecule size distribution
 ```{r molecule-size, echo=F}
 Nx <- function(x, p) {
-	sorted <- rev(sort(x))
+	sorted <- as.numeric(rev(sort(x)))
 	sorted[cumsum(sorted) >= sum(sorted) * p][1]
 }
 
