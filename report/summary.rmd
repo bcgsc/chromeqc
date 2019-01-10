@@ -116,3 +116,18 @@ ggplot(barcodes) +
 	labs(x = "Molecules per barcode", y = "Barcodes") +
 	ggtitle(paste("Mean molecules per barcode =", barcodes_summary$Molecules_per_barcode))
 ```
+
+# Reads per molecule
+```{r reads-per-molecule, echo=F}
+observed_molecules_summary <- observed_molecules %>%
+	summarize(
+		Reads = sum(Reads),
+		Molecules = n(),
+		Reads_per_molecule = Reads / Molecules)
+
+ggplot(observed_molecules) +
+	aes(x = Reads) +
+	geom_histogram(binwidth = 10) +
+	labs(x = "Reads per molecule", y = "Molecules") +
+	ggtitle(paste("Mean reads per molecule =", observed_molecules_summary$Reads_per_molecule))
+```
