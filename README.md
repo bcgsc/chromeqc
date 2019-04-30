@@ -23,6 +23,8 @@ This tool provides a quick report on the quality of a 10x Genomics Chromium link
 + [Sample MultiQC report](https://bcgsc.github.io/chromeqc/multiqc/)
 
 ```sh
+# Install Homebrew on macOS, Linux, or Windows: https://brew.sh
+which pigz || brew install pigz
 python3 select_random_subset/random_sampling_from_whitelist.py -v -w data/4M-with-alts-february-2016.txt -i data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz | pigz -p4 >data/subsampled.fq.gz
 ```
 
