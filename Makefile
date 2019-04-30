@@ -85,6 +85,10 @@ data/GRCh38.fa.gz:
 	mkdir -p $(@D)
 	curl -o $@ ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
+# Download the barcode white list.
+data/4M-with-alts-february-2016.txt:
+	curl -o $@ https://raw.githubusercontent.com/10XGenomics/supernova/master/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+
 # Uncompress data.
 data/%.fa: data/%.fa.gz
 	mkdir -p $(@D)

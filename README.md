@@ -23,7 +23,7 @@ This tool provides a quick report on the quality of a 10x Genomics Chromium link
 + [Sample MultiQC report](https://bcgsc.github.io/chromeqc/multiqc/)
 
 ```sh
-python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
+python3 select_random_subset/random_sampling_from_whitelist.py -v -w data/4M-with-alts-february-2016.txt -i data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz | pigz -p4 >data/subsampled.fq.gz
 ```
 
 The pipeline starts with raw FASTQ files of interleaved paired end reads provided by the 10x Chromium platform.
