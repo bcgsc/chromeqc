@@ -19,8 +19,8 @@ This tool provides a quick report on the quality of a 10x Genomics Chromium link
 
 # Examples
 
-+ [Sample ChromeQC report](https://hackseq.github.io/2017_project_6/report/)
-+ [Sample MultiQC report](https://hackseq.github.io/2017_project_6/multiqc/)
++ [Sample ChromeQC report](http://bcgsc.github.io/chromeqc/report)
++ [Sample MultiQC report](https://bcgsc.github.io/chromeqc/multiqc/)
 
 ```sh
 python3 random_sampling_from_whitelist.py -w ../data/whitelist_barcodes.txt.gz -i ../data/read-RA_si-GAGTTAGT_lane-001-chunk-0002.fastq.gz -v
